@@ -21,7 +21,7 @@ rm(list = ls())
 
 dir <- list()
 dir$root <- getwd()
-dir$stores <- file.path(dir$root, "stores")
+dir$stores <- file.path(dir$root, "stores", "raw")
 dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
 setwd(dir$root)
