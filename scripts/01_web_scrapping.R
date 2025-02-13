@@ -1,6 +1,6 @@
 ##########################################################
 # Title: WebScrapping.
-# Description: This script webscarp the data from the website
+# Description: This script webscrapes the data from the website
 # https://ignaciomsarmiento.github.io/GEIH2018_sample/ the
 # objective is to retrive 10 chunks of data from the website
 # corresponding to a sample of GEIH 2018. Each one would be
