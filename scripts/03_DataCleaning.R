@@ -42,8 +42,11 @@ skim(db_geih) %>% head()
 db_geih_1 <- db_geih %>% select(-c(p550,y_gananciaNetaAgro_m))
 skim(db_geih_1)
 
+# filtro mayores de edad y ocupados
+db_geih_2 <- db_geih_1 %>% filter(age>=18,dsi==0)
+
 # Pre filtro columnas, completitud superior al 70% o relevancia ecónomica (42 variables)
-db_geih_2 <- db_geih_1 %>% select(c(directorio,secuencia_p,orden,clase,mes,estrato1,sex,age,
+db_geih_3 <- db_geih_2 %>% select(c(directorio,secuencia_p,orden,clase,mes,estrato1,sex,age,
                                     p6050,p6090,p6100,p6210,p6210s1,p6240,p7495,
                                     p7500s1a1,p7500s2a1,p7500s3a1,p7505,p7510s1a1,p7510s2a1,p7510s3a1,p7510s5a1,p7510s6a1,p7510s7a1,
                                     pet,iof1,iof2,iof3h,iof3i,iof6,
@@ -52,6 +55,11 @@ db_geih_2 <- db_geih_1 %>% select(c(directorio,secuencia_p,orden,clase,mes,estra
                                     totalHoursWorked,formal # relevantes
                                     )) 
 
-skim(db_geih_2)
+skim(db_geih_3)
 
+# Inputación Medias de variables numericas
+db_geih_4 <- db_geih_3 %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
 
+# guardar data limpia
+write.csv(db_geih_4,"data_limpiaGEIH.csv",row.names = F)
