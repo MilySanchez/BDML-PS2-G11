@@ -7,6 +7,7 @@ library(ggplot2)
 library(rio)
 library(skimr)
 library(visdat)
+library(stargazer)
 
 
 # 02_Definir directorio
@@ -40,10 +41,12 @@ skim(db_geih) %>% head()
 # Limpieza NAS - 
 
 db_geih_1 <- db_geih %>% select(-c(p550,y_gananciaNetaAgro_m))
-skim(db_geih_1)
 
-# filtro mayores de edad y ocupados
+
+# filtro mayores de edad y ocupados y 
 db_geih_2 <- db_geih_1 %>% filter(age>=18,dsi==0)
+
+skim(db_geih_2)
 
 # Pre filtro columnas, completitud superior al 70% o relevancia ecónomica (42 variables)
 db_geih_3 <- db_geih_2 %>% select(c(directorio,secuencia_p,orden,clase,mes,estrato1,sex,age,
@@ -57,9 +60,33 @@ db_geih_3 <- db_geih_2 %>% select(c(directorio,secuencia_p,orden,clase,mes,estra
 
 skim(db_geih_3)
 
+#filtro final (ingresos mayores a 0)
+
+db_geih_4 <- db_geih_3 %>% filter(ingtot>0)
+
 # Inputación Medias de variables numericas
-db_geih_4 <- db_geih_3 %>%
+db_geih_5 <- db_geih_4 %>%
   mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
 
 # guardar data limpia
-write.csv(db_geih_4,"data_limpiaGEIH.csv",row.names = F)
+write.csv(db_geih_5,"data_limpiaGEIH.csv",row.names = F)
+
+
+## PUNTO 3
+
+# transformación a ingreso por horas laboradas y log
+db_geih_6 <- db_geih_5 %>% mutate(logwage=log(ingtot/40), age2=age^2)
+
+# regresion
+reg1 <- lm(logwage~age+age2, data=db_geih_6)
+
+summary(reg1)
+
+ggplot(db_geih_6, aes(x = age, y = logwage)) +
+  geom_point(alpha = 0.5) +  
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red", se = TRUE) +
+  labs(title = "Regresión",
+       x = "Age",
+       y = "log(W)") +
+  theme_minimal()
+
