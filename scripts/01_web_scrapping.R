@@ -73,4 +73,4 @@ scrape_table <- function(link) {
 tables_list <- lapply(data_chunk_links, scrape_table)
 
 
-
+#change
