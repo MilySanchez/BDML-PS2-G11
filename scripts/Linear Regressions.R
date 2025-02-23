@@ -1,14 +1,44 @@
-# Cargar librerías necesarias
+##########################################################
+# Title: Linear Regressions.
+# Description: This script ...
+#
+# Date: 23/02/2025
+##########################################################
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+
+# Clear workspace
+
+rm(list = ls())
+
+# Set up paths
+
+dir <- list()
+dir$root <- getwd()
+dir$stores <- file.path(dir$root, "stores", "raw")
+dir$views <- file.path(dir$root, "views")
+dir$scripts <- file.path(dir$root, "scripts")
+setwd(dir$root)
+
+# Load required libraries
+
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
-# Definir directorio
-setwd('C:/Users/jroja/OneDrive/Documents/Big Data & Machine Learning/Problem Set 1')
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 1. Load data ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = =
 
 # Cargar data limpia
 data_geih <- read.csv('clean_data.csv')
 
 # Revisar las posibles variables para modelar
 colnames(data_geih)
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 2. Transform data ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = =
 
 # Revisar qué diferencia existe entre ingtot e ingtotob
 sum(data_geih$ingtot == data_geih$ingtotob)
@@ -30,6 +60,10 @@ data_geih <- data_geih %>% mutate(educ_2 = maxEducLevel^2)
 # Convertir maxEduc y regSalud en vars categóricas
 data_geih$maxEducLevel <- as.factor(data_geih$maxEducLevel)
 data_geih$regSalud <- as.factor(data_geih$regSalud)
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 2. Run regressions wage vs sex ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = =
 
 # regresar el ingreso solo contra la variable dicótoma de género
 reg_simple <- lm(log_ingtot ~ sex, data = data_geih)
