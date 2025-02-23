@@ -1,18 +1,45 @@
 
 # 01_Cargar Librerias
-library(tidyverse)
-library(readr)
-library(dplyr)
-library(ggplot2)
-library(rio)
-library(skimr)
-library(visdat)
-library(stargazer)
+# library(tidyverse)
+# library(readr)
+# library(dplyr)
+# library(ggplot2)
+# library(rio)
+# library(skimr)
+# library(visdat)
+# library(stargazer)
+##########################################################
+# Title: Data Cleaning.
+# Description: This script webscrapes the data from the website
+# https://ignaciomsarmiento.github.io/GEIH2018_sample/ the
+# objective is to retrive 10 chunks of data from the website
+# corresponding to a sample of GEIH 2018. Each one would be
+# stored in a individual csv file.
+#
+# Date: 09/02/2025
+##########################################################
 
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
 
-# 02_Definir directorio
+# Clear workspace
 
-setwd("C:/Users/Asus/Documents/01_MAESTRIA/2 Semestre/ML/01_ProblemSet1")
+rm(list = ls())
+
+# Set up paths
+
+dir <- list()
+dir$root <- getwd()
+dir$stores <- file.path(dir$root, "stores", "raw")
+dir$views <- file.path(dir$root, "views")
+dir$scripts <- file.path(dir$root, "scripts")
+setwd(dir$root)
+
+# Load required libraries
+
+source(file.path(dir$scripts, "00_load_requierments.R"))
+
 
 # 02_ Cargar insumos GEIH del webscrapping
 
