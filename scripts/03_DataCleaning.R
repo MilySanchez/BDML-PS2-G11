@@ -56,33 +56,59 @@ db_geih_3 <- db_geih_2 %>% select(c(directorio,secuencia_p,orden,clase,mes,estra
                                     ingtotob,ingtot,maxEducLevel,regSalud,
                                     wap,ocu,dsi,pea,inac,
                                     totalHoursWorked,formal # relevantes
-                                    )) 
+)) 
 
 skim(db_geih_3)
 
+# Transformación variables categorias a factor
+
+db_geih_4 <- db_geih_3 %>% mutate(sex=as.factor(sex),
+                                  estrato1=as.factor(estrato1),
+                                  age=as.factor(age),
+                                  p6050=as.factor(p6050),
+                                  p6090=as.factor(p6090),
+                                  p6100=as.factor(p6100),
+                                  p6210=as.factor(p6210),
+                                  p6210s1=as.factor(p6210s1),
+                                  p6240=as.factor(p6240),
+                                  p7495=as.factor(p7495),
+                                  p7505=as.factor(p7505),
+                                  pet=as.factor(pet),
+                                  maxEducLevel=as.factor(maxEducLevel),
+                                  regSalud=as.factor(regSalud),
+                                  wap=as.factor(wap),
+                                  ocu=as.factor(ocu),
+                                  dsi=as.factor(dsi),
+                                  pea=as.factor(pea),
+                                  inac=as.factor(inac),
+                                  formal=as.factor(formal)
+)
+
+
 #filtro final (ingresos mayores a 0)
 
-db_geih_4 <- db_geih_3 %>% filter(ingtot>0)
+db_geih_5 <- db_geih_4 %>% filter(ingtot>0)
 
 # Inputación Medias de variables numericas
-db_geih_5 <- db_geih_4 %>%
-  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+db_geih_6 <- db_geih_5 %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% 
+  mutate(age=as.numeric(age))
 
 # guardar data limpia
-write.csv(db_geih_5,"data_limpiaGEIH.csv",row.names = F)
+write.csv(db_geih_6,"data_limpiaGEIH.csv",row.names = F)
 
 
 ## PUNTO 3
 
 # transformación a ingreso por horas laboradas y log
-db_geih_6 <- db_geih_5 %>% mutate(logwage=log(ingtot/40), age2=age^2)
+db_geih_7 <- db_geih_6 %>% mutate(logwage=log(ingtot/totalHoursWorked), age2=age^2)
 
 # regresion
-reg1 <- lm(logwage~age+age2, data=db_geih_6)
+reg1 <- lm(logwage~age+age2, data=db_geih_7)
 
 summary(reg1)
 
-ggplot(db_geih_6, aes(x = age, y = logwage)) +
+ggplot(db_geih_7, aes(x = age, y = logwage)) +
   geom_point(alpha = 0.5) +  
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red", se = TRUE) +
   labs(title = "Regresión",
