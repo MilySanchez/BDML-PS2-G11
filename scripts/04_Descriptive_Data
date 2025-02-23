@@ -60,3 +60,7 @@ corr_graph <- db_geih %>%
 
 ggcorrplot(corr_graph, type = "lower", lab = T, show.legend = F) 
 db_geih
+
+#holaaaaa
+
+
