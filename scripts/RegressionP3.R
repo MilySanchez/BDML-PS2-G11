@@ -1,15 +1,6 @@
 
-# 01_Cargar Librerias
-# library(tidyverse)
-# library(readr)
-# library(dplyr)
-# library(ggplot2)
-# library(rio)
-# library(skimr)
-# library(visdat)
-# library(stargazer)
 ##########################################################
-# Title: Data Cleaning.
+# Title: Exercise Number 3 Regression Wage ~ age.
 # Description: This script webscrapes the data from the website
 # https://ignaciomsarmiento.github.io/GEIH2018_sample/ the
 # objective is to retrive 10 chunks of data from the website
@@ -32,6 +23,7 @@ rm(list = ls())
 dir <- list()
 dir$root <- getwd()
 dir$stores <- file.path(dir$root, "stores", "raw")
+dir$processed <- file.path(dir$root, "stores", "processed")
 dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
 setwd(dir$root)
@@ -42,9 +34,7 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 
 
 # 02_load clean data GEIH DB
-
-data_limpia <- read.csv('data_limpiaGEIH.csv')
-
+data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 
 ## 3
 
