@@ -22,7 +22,8 @@ rm(list = ls())
 
 dir <- list()
 dir$root <- getwd()
-dir$stores <- file.path(dir$root, "stores", "raw")
+dir$processed <- file.path(dir$root, "stores", "processed")
+dir$raw <- file.path(dir$root, "stores", "raw")
 dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
 setwd(dir$root)
@@ -34,7 +35,7 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 
 # 02_load inputs GEIH DB
 
-db_geih <- read.csv('table_geih.csv')
+db_geih <- read.csv(file.path(dir$raw,'table_geih.csv'))
 
 # 03_Overview
 # Columns
@@ -46,30 +47,20 @@ skim(db_geih) %>% head()
 
 
 # 04_DATA CLEANING
-
 # FILTER (>= 18 YEAR AND LABOR POPULATION) 16.542
 db_geih <- db_geih %>% filter(age>=18,ocu==1)
 
 skim_result <- skim(db_geih)
 
 
-db_geih <- db_geih[skim_result$complete_rate >= 0.7, ]
+filter_columns <- skim_result[skim_result$complete_rate >= 0.7, ] %>% select(skim_variable) %>% pull()
+
 
 # COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (42 variables)
-db_geih <- db_geih %>% select(c(directorio,secuencia_p,orden,clase,mes,estrato1,sex,age,oficio,relab,
-                                    p6050,p6090,p6100,p6210,p6210s1,p6240,p7495,
-                                    p7500s1a1,p7500s2a1,p7500s3a1,p7505,p7510s1a1,p7510s2a1,p7510s3a1,p7510s5a1,p7510s6a1,p7510s7a1,
-                                    pet,iof1,iof2,iof3h,iof3i,iof6,
-                                    ingtotob,ingtot,maxEducLevel,regSalud,
-                                    wap,ocu,dsi,pea,inac,
-                                    totalHoursWorked,formal # relevantes
-)) 
-
-skim(db_geih)
+db_geih <- db_geih %>% select(all_of(filter_columns)) 
 
 # TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES
-
-db_geih_4 <- db_geih_3 %>% mutate(sex=as.factor(sex),
+db_geih <- db_geih %>% mutate(sex=as.factor(sex),
                                   estrato1=as.factor(estrato1),
                                   age=as.factor(age),
                                   p6050=as.factor(p6050),
@@ -91,18 +82,19 @@ db_geih_4 <- db_geih_3 %>% mutate(sex=as.factor(sex),
                                   formal=as.factor(formal)
 )
 
+# REMOVE DUPLICATE COLUMNS
+db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac))
 
-# LAST FILTER WAGE > 0
-
-db_geih_5 <- db_geih_4 %>% filter(ingtot>0)
+# FILTER WAGE > 0
+db_geih <- db_geih %>% filter(ingtot>0)
 
 # AVERAGES-MEANS OF NUMERICAL VARIABLES ON NAS
-db_geih_6 <- db_geih_5 %>%
+db_geih <- db_geih %>%
   mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% 
   mutate(age=as.numeric(age))
 
 # SAVE DATA CLEAN
-write.csv(db_geih_6, file.path(dir$stores, paste0("data_limpiaGEIH", ".csv")), row.names = F)
+write.csv(db_geih, file.path(dir$processed, paste0("data_cleanGEIH", ".csv")), row.names = F)
 
 
 
