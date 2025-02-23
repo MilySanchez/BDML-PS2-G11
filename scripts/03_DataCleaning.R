@@ -41,22 +41,9 @@ setwd(dir$root)
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
 
-# 02_load inputs GEIH
+# 02_load inputs GEIH DB
 
-cargar_unir_tablas <- function(ruta = "Insumos/", n = 10) {
-  # Generar los nombres de los archivos
-  archivos <- paste0(ruta, "table_geih_", 1:n, ".csv")
-  
-  # Leer y combinar los archivos
-  tabla_combinada <- archivos %>%
-    lapply(read_csv) %>%
-    bind_rows()
-  
-  return(tabla_combinada)
-}
-
-# Llamar a la función # 32.177 registros, 178 variables
-db_geih <- cargar_unir_tablas()
+db_geih <- read.csv('table_geih.csv')
 
 # Columnas
 variable.names(db_geih)
@@ -124,21 +111,4 @@ db_geih_6 <- db_geih_5 %>%
 write.csv(db_geih_6, file.path(dir$stores, paste0("data_limpiaGEIH", ".csv")), row.names = F)
 
 
-## 3
-
-# CONVERT TO HOUR WAGE AND LOG
-db_geih_7 <- db_geih_6 %>% mutate(logwage=log(ingtot/totalHoursWorked), age2=age^2)
-
-# REGRESSION
-reg1 <- lm(logwage~age+age2, data=db_geih_7)
-
-summary(reg1)
-
-ggplot(db_geih_7, aes(x = age, y = logwage)) +
-  geom_point(alpha = 0.5) +  
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red", se = TRUE) +
-  labs(title = "Regresión",
-       x = "Age",
-       y = "log(W)") +
-  theme_minimal()
 
