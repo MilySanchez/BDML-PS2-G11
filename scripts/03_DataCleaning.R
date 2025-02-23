@@ -41,7 +41,7 @@ setwd(dir$root)
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
 
-# 02_ Cargar insumos GEIH del webscrapping
+# 02_load inputs GEIH
 
 cargar_unir_tablas <- function(ruta = "Insumos/", n = 10) {
   # Generar los nombres de los archivos
@@ -65,17 +65,16 @@ head(db_geih)
 ## summary db
 skim(db_geih) %>% head()
 
-# Limpieza NAS - 
 
-db_geih_1 <- db_geih %>% select(-c(p550,y_gananciaNetaAgro_m))
+# DATA CLEANING
+db_geih_1 <- db_geih
 
-
-# filtro mayores de edad y ocupados y 
+# FILTER (>= 18 YEAR AND LABOR POPULATION) 
 db_geih_2 <- db_geih_1 %>% filter(age>=18,dsi==0)
 
 skim(db_geih_2)
 
-# Pre filtro columnas, completitud superior al 70% o relevancia ecónomica (42 variables)
+# COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (42 variables)
 db_geih_3 <- db_geih_2 %>% select(c(directorio,secuencia_p,orden,clase,mes,estrato1,sex,age,
                                     p6050,p6090,p6100,p6210,p6210s1,p6240,p7495,
                                     p7500s1a1,p7500s2a1,p7500s3a1,p7505,p7510s1a1,p7510s2a1,p7510s3a1,p7510s5a1,p7510s6a1,p7510s7a1,
@@ -87,7 +86,7 @@ db_geih_3 <- db_geih_2 %>% select(c(directorio,secuencia_p,orden,clase,mes,estra
 
 skim(db_geih_3)
 
-# Transformación variables categorias a factor
+# TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES
 
 db_geih_4 <- db_geih_3 %>% mutate(sex=as.factor(sex),
                                   estrato1=as.factor(estrato1),
@@ -112,25 +111,25 @@ db_geih_4 <- db_geih_3 %>% mutate(sex=as.factor(sex),
 )
 
 
-#filtro final (ingresos mayores a 0)
+# LAST FILTER WAGE > 0
 
 db_geih_5 <- db_geih_4 %>% filter(ingtot>0)
 
-# Inputación Medias de variables numericas
+# AVERAGES-MEANS OF NUMERICAL VARIABLES ON NAS
 db_geih_6 <- db_geih_5 %>%
   mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% 
   mutate(age=as.numeric(age))
 
-# guardar data limpia
-write.csv(db_geih_6,"data_limpiaGEIH.csv",row.names = F)
+# SAVE DATA CLEAN
+write.csv(db_geih_6, file.path(dir$stores, paste0("data_limpiaGEIH", ".csv")), row.names = F)
 
 
-## PUNTO 3
+## 3
 
-# transformación a ingreso por horas laboradas y log
+# CONVERT TO HOUR WAGE AND LOG
 db_geih_7 <- db_geih_6 %>% mutate(logwage=log(ingtot/totalHoursWorked), age2=age^2)
 
-# regresion
+# REGRESSION
 reg1 <- lm(logwage~age+age2, data=db_geih_7)
 
 summary(reg1)
