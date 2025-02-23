@@ -21,7 +21,8 @@ rm(list = ls())
 
 dir <- list()
 dir$root <- getwd()
-dir$stores <- file.path(dir$root, "stores", "raw")
+dir$raw <- file.path(dir$root, "stores", "raw")
+dir$processed <- file.path(dir$root, "stores", "processed")
 dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
 setwd(dir$root)
@@ -72,5 +73,7 @@ scrape_table <- function(link) {
 # Apply the function to each link
 tables_list <- lapply(data_chunk_links, scrape_table)
 
+# save the merge of all tables
 
-#comment two
+data_geih <- bind_rows(tables_list)
+
