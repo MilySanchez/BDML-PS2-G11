@@ -62,7 +62,6 @@ db_geih <- db_geih %>% select(all_of(filter_columns))
 # TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES AND WAGE BY HOUR
 db_geih <- db_geih %>% mutate(sex=as.factor(sex),
                                   estrato1=as.factor(estrato1),
-                                  age=as.factor(age),
                                   p6050=as.factor(p6050),
                                   p6090=as.factor(p6090),
                                   p6100=as.factor(p6100),

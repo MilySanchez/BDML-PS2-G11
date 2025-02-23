@@ -39,14 +39,14 @@ data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 ## 3
 
 # CONVERT TO HOUR WAGE AND LOG
-db_geih_7 <- db_geih_6 %>% mutate(logwage=log(ingtot/totalHoursWorked), age2=age^2)
+data_clean <- data_clean %>% mutate(logwage=log(ingtot_H), age2=age^2)
 
 # REGRESSION
-reg1 <- lm(logwage~age+age2, data=db_geih_7)
+reg1 <- lm(logwage~age+age2, data=data_clean)
 
-summary(reg1)
+stargazer(reg1,summary = F)
 
-ggplot(db_geih_7, aes(x = age, y = logwage)) +
+ggplot(data_clean, aes(x = age, y = logwage)) +
   geom_point(alpha = 0.5) +  
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red", se = TRUE) +
   labs(title = "Regresión",
