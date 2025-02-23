@@ -1,13 +1,4 @@
 
-# 01_Cargar Librerias
-# library(tidyverse)
-# library(readr)
-# library(dplyr)
-# library(ggplot2)
-# library(rio)
-# library(skimr)
-# library(visdat)
-# library(stargazer)
 ##########################################################
 # Title: Data Cleaning.
 # Description: This script webscrapes the data from the website
@@ -23,7 +14,7 @@
 # 0. Workspace configuration ====================================================================
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
 
-# Clear workspace
+# 01_Clear workspace
 
 rm(list = ls())
 
@@ -45,7 +36,8 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 
 db_geih <- read.csv('table_geih.csv')
 
-# Columnas
+# 03_Overview
+# Columns
 variable.names(db_geih)
 ## print data
 head(db_geih)
@@ -53,16 +45,18 @@ head(db_geih)
 skim(db_geih) %>% head()
 
 
-# DATA CLEANING
-db_geih_1 <- db_geih
+# 04_DATA CLEANING
 
-# FILTER (>= 18 YEAR AND LABOR POPULATION) 
-db_geih_2 <- db_geih_1 %>% filter(age>=18,dsi==0)
+# FILTER (>= 18 YEAR AND LABOR POPULATION) 16.542
+db_geih <- db_geih %>% filter(age>=18,ocu==1)
 
-skim(db_geih_2)
+skim_result <- skim(db_geih)
+
+
+db_geih <- db_geih[skim_result$complete_rate >= 0.7, ]
 
 # COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (42 variables)
-db_geih_3 <- db_geih_2 %>% select(c(directorio,secuencia_p,orden,clase,mes,estrato1,sex,age,
+db_geih <- db_geih %>% select(c(directorio,secuencia_p,orden,clase,mes,estrato1,sex,age,oficio,relab,
                                     p6050,p6090,p6100,p6210,p6210s1,p6240,p7495,
                                     p7500s1a1,p7500s2a1,p7500s3a1,p7505,p7510s1a1,p7510s2a1,p7510s3a1,p7510s5a1,p7510s6a1,p7510s7a1,
                                     pet,iof1,iof2,iof3h,iof3i,iof6,
@@ -71,7 +65,7 @@ db_geih_3 <- db_geih_2 %>% select(c(directorio,secuencia_p,orden,clase,mes,estra
                                     totalHoursWorked,formal # relevantes
 )) 
 
-skim(db_geih_3)
+skim(db_geih)
 
 # TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES
 
