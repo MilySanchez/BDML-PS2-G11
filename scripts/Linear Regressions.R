@@ -41,7 +41,7 @@ colnames(data_geih)
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = =
 
 # Check the difference between ingtot and igntotob
-sum(data_geih$ingtot == data_geih$ingtotob)
+sum(data_geih$ingtot != data_geih$ingtotob)
 
 # Create a new column of the log(wage) and add columns of non labour income and wage
 data_geih <- data_geih %>% mutate(log_ingtot = log(ingtot),
