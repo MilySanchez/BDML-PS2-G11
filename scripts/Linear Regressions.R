@@ -1,9 +1,5 @@
 # Cargar librerías necesarias
-library(pacman)
-p_load(dplyr,
-       lmtest,
-       stargazer,
-       ggplot2)
+source(file.path(dir$scripts, "00_load_requierments.R"))
 
 # Definir directorio
 setwd('C:/Users/jroja/OneDrive/Documents/Big Data & Machine Learning/Problem Set 1')
