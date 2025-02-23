@@ -34,7 +34,7 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 data_geih <- read.csv(file.path(dir$stores, 'data_limpiaGEIH.csv'))
 
 # Check the names of the variables
-colnames(data_geih)
+colnames(data_geih)+
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
 # 2. Transform data ====================================================================
@@ -56,10 +56,6 @@ data_geih <- data_geih %>% mutate(salario_h = ingtotsal / (totalHoursWorked*4))
 
 # Create variable of education ^2
 data_geih <- data_geih %>% mutate(educ_2 = maxEducLevel^2)
-
-# Define maxEducLevel and regSalud as factor (categoric) variables
-data_geih$maxEducLevel <- as.factor(data_geih$maxEducLevel)
-data_geih$regSalud <- as.factor(data_geih$regSalud)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
 # 2. Run regressions wage vs sex ====================================================================
