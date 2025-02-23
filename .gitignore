@@ -279,3 +279,6 @@ rsconnect/
 
 
 # End of https://www.toptal.com/developers/gitignore/api/r,macos,python,microsoftoffice
+.Rproj.user
+.Rdata
+.quarto
