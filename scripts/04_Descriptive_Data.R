@@ -110,3 +110,4 @@ corr_graph <- db_geih |>
 p <- ggcorrplot(corr_graph, type = "lower", lab = T, show.legend = F) 
 ggsave(filename =file.path(dir$views,'corr_graph.png'), plot = p, width = 10, height = 10, dpi = 300)
 
+db_geih |> select(ingtot_H)
