@@ -1,4 +1,4 @@
-library(boot)
+
 ##########################################################
 # Title: Exercise Number 3 Regression Wage ~ age.
 # Description: This script webscrapes the data from the website
