@@ -31,53 +31,39 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = =
 
 # Load clean data
-data_geih <- read.csv(file.path(dir$stores, 'data_limpiaGEIH.csv'))
+data_clean <- read.csv(file.path(dir$stores,'data_cleanGEIH.csv'))
 
 # Check the names of the variables
-colnames(data_geih)+
+colnames(data_clean)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
 # 2. Transform data ====================================================================
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = =
 
-# Check the difference between ingtot and igntotob
-sum(data_geih$ingtot != data_geih$ingtotob)
+# CONVERT TO HOUR WAGE AND LOG
+data_clean <- data_clean %>% mutate(logwage=log(ingtot_H),
+                                    age2=age^2)
 
-# Create a new column of the log(wage) and add columns of non labour income and wage
-data_geih <- data_geih %>% mutate(log_ingtot = log(ingtot),
-                                  log_ingtot = if_else(log_ingtot == '-Inf', 0, log_ingtot),
-                                  ingnolab = p7500s1a1 + p7500s2a1 + p7500s3a1 +
-                                    p7510s1a1 + p7510s2a1 + p7510s3a1 +
-                                    p7510s5a1 + p7510s6a1 + p7510s7a1,
-                                  ingtotsal = ingtot - ingnolab)
+data_clean <- data_clean %>% mutate(oficio = as.factor(oficio),
+                                    relab = as.factor(relab),
+                                    maxEducLevel = as.factor(maxEducLevel),
+                                    regSalud = as.factor(regSalud),
+                                    cotPension = as.factor(cotPension),
+                                    college = as.factor(college),
+                                    cuentaPropia = as.factor(cuentaPropia))
 
-# Create a new column with data on the hourly wage
-data_geih <- data_geih %>% mutate(salario_h = ingtotsal / (totalHoursWorked*4))
-
-# Create variable of education ^2
-data_geih <- data_geih %>% mutate(educ_2 = maxEducLevel^2)
-
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
-# 2. Run regressions wage vs sex ====================================================================
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = =
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+# 3. Run regressions wage vs sex ===============================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 # regression between wage and the gender dichotomous variable
-reg_simple <- lm(log_ingtot ~ sex, data = data_geih)
+reg_simple <- lm(logwage ~ sex, data = data_clean)
 stargazer(reg_simple, type = 'text')
 
-# regression between hourly wage and the gender dichotomous variable
-reg_simple2 <- lm(salario_h ~ sex, data = data_geih)
-stargazer(reg_simple2, type = 'text')
-
 # regression between wage and gender, controlling by characteristics of workers
-reg_mul1 <- lm(log_ingtot ~ sex + age + maxEducLevel + educ_2 + regSalud +
-                 formal + totalHoursWorked + p7505, data = data_geih)
-stargazer(reg_mul1, type = 'text')
+reg_multi <- lm(logwage ~ sex + age + age2 + oficio + relab + p6426 + 
+                  maxEducLevel + p6870 + regSalud + 
+                  college + regSalud + cotPension + formal + cuentaPropia + 
+                  p7495 + p7505, data = data_clean)
+stargazer(reg_multi, type = 'text')
 
-# regression between hourly wage and gender dichotomous variable controlling by
-# workers' characteristics
-reg_mul2 <- lm(salario_h ~ sex + age + maxEducLevel + educ_2 + regSalud + 
-                 formal + totalHoursWorked + p7505, data = data_geih)
-stargazer(reg_mul2, type = 'text')
-
-## deberíamos incluir oficio y relab!
