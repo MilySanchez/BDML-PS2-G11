@@ -44,7 +44,7 @@ data_clean <- data_clean %>% mutate(logwage=log(ingtot_H), age2=age^2)
 # REGRESSION
 reg1 <- lm(logwage~age+age2, data=data_clean)
 
-stargazer(reg1,summary = F)
+stargazer(reg1,summary = F, out=file.path(dir$views,'reg1.txt'))
 
 ggplot(data_clean, aes(x = age, y = logwage)) +
   geom_point(alpha = 0.5) +  

@@ -79,11 +79,12 @@ db_geih <- db_geih %>% mutate(sex=as.factor(sex),
                                   pea=as.factor(pea),
                                   inac=as.factor(inac),
                                   formal=as.factor(formal),
+                                  oficio=as.factor(oficio),
                                   ingtot_H=ingtot/totalHoursWorked
 )
 
 # REMOVE DUPLICATE COLUMNS
-db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac))
+db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac,p6920,pea,informal,p7070,maxEducLevel,sizeFirm))
 
 # FILTER WAGE > 0
 db_geih <- db_geih %>% filter(ingtot>0)
