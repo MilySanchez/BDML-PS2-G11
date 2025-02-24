@@ -20,7 +20,7 @@ install_and_load <- function(packages) {
 }
 
 # Define required packages
-required_packages <- c("tidyverse", "data.table", "ggplot2", "dplyr",
+required_packages <- c("tidyverse", "data.table", "ggplot2", "dplyr","ggcorrplot",
                        "readr", "lubridate", "stringr", "rvest", "rio", "skimr", "visdat","stargazer","purrr")
 
 # Install and load all required packages
