@@ -35,16 +35,18 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
 
 #load data
-db_geih <- read.csv(file.path(dir$processed,'data_limpiaGEIH.csv'))
+db_geih <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 
 #get descriptive statistic table of all variables after cleaning
-skim_result <- skim(db_geih)
+skim_result <- skim(db_geih |>select(-c(dominio,...1,directorio,secuencia_p,orden)))
 
 #save the descriptive table in a txt file
-stargazer(skim_result, summary=FALSE, out = file.path(dir$results,'data_description.txt'))
+stargazer(as.data.frame(skim_result), summary=F, type="text",out = file.path(dir$views,'data_description.txt'))
 
 #create a new df containing just discrete data
-db_geih_discrete <- db_geih |> select(estrato1, sex, p6050, p6090,p6100, p6210, p6240,p7495, p7505,regSalud, formal)
+db_geih_discrete <- db_geih |> select(p6870, p6050, relab, estrato1, p6240, regSalud,
+                                      cotPension, p6050, p6090,p7495, p7505,p7040, 
+                                      p7090, cuentaPropia, microEmpresa, sex, formal)
 
 #get percentages of every possible category for all discrete data
 porcentajes <- list()
@@ -97,13 +99,14 @@ tabla_porcentajes <- cbind(valor = categorias, tabla_porcentajes)
 tabla_porcentajes[is.na(tabla_porcentajes)] <- ""
 
 #save the result table in a txt file
-stargazer(as.data.frame(prop.table(table(db_geih$formal))), summary = FALSE, type="text", out=file.path(dir$results,'discrete_description.txt'))
+stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, type="text", out=file.path(dir$views,'discrete_description.txt'))
 
 #create a correlation graph for each variable
-corr_graph <- db_geih %>%
-  cor(use = "pairwise") %>% 
+corr_graph <- db_geih |>
+  select_if(is.numeric) |> 
+  cor(use = "pairwise") |>
   round(1)
 
-ggcorrplot(corr_graph, type = "lower", lab = T, show.legend = F) 
-ggsave(filename =file.path(dir$views,'corr_graph.png'), plot = p, width = 8, height = 6, dpi = 300)
+p <- ggcorrplot(corr_graph, type = "lower", lab = T, show.legend = F) 
+ggsave(filename =file.path(dir$views,'corr_graph.png'), plot = p, width = 10, height = 10, dpi = 300)
 
