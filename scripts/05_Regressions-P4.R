@@ -17,7 +17,8 @@ rm(list = ls())
 
 dir <- list()
 dir$root <- getwd()
-dir$stores <- file.path(dir$root, "stores", "raw")
+dir$processed <- file.path(dir$root, "stores", "processed")
+dir$raw <- file.path(dir$root, "stores", "raw")
 dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
 setwd(dir$root)
@@ -31,7 +32,7 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 # Load clean data
-data_clean <- read.csv(file.path(dir$stores,'data_cleanGEIH.csv'))
+data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 
 # Check the names of the variables
 colnames(data_clean)
@@ -60,10 +61,20 @@ data_clean <- data_clean %>% mutate(oficio = as.factor(oficio),
 reg_simple <- lm(logwage ~ sex, data = data_clean)
 stargazer(reg_simple, type = 'text')
 
-# regression between wage and gender, controlling by characteristics of workers
-reg_multi <- lm(logwage ~ sex + age + age2 + oficio + relab + p6426 + 
-                  maxEducLevel + p6870 + regSalud + 
-                  college + regSalud + cotPension + formal + cuentaPropia + 
-                  p7495 + p7505, data = data_clean)
-stargazer(reg_multi, type = 'text')
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+# 4. Run regressions wage vs sex with controls ================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
+resid_logwage <- residuals(lm(logwage ~ age + age2 + oficio + relab + p6426 + 
+                                maxEducLevel + p6870 + regSalud + 
+                                college + regSalud + cotPension + formal + 
+                                cuentaPropia + p7495 + p7505, data = data_clean))
+
+# Regress sex on all control variables (excluding logwage)
+resid_sex <- residuals(lm(sex ~ age + age2 + oficio + relab + p6426 + 
+                            maxEducLevel + p6870 + regSalud + 
+                            college + regSalud + cotPension + formal + 
+                            cuentaPropia + p7495 + p7505, data = data_clean))
+
+# Regress residuals of logwage on residuals of sex
+reg_multiple <- lm(resid_logwage ~ resid_sex)
