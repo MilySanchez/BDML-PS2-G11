@@ -97,3 +97,19 @@ stargazer(reg_FWL, type = 'latex')
 # 5. Estimate the conditional wage gap using FWL with bootstrap ===============
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
+# Create a function that gets coefficients
+fn <- function(data, index){
+  coef(lm(logwage ~ female + age + age2 + relab + p6426 + 
+            p6870 + regSalud + p6210 + regSalud + cotPension + 
+            formal + p7495 + p7505, data = data, subset = index))[2]
+}
+
+# Check that the function works
+fn(data_clean, 1:nrow(data_clean))
+
+# Estimate the standard error using boot
+
+boot(data_clean, fn, R = 1000)
+
+
+
