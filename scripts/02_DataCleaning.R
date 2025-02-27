@@ -1,11 +1,12 @@
 
 ##########################################################
 # Title: Data Cleaning.
-# Description: This script webscrapes the data from the website
-# https://ignaciomsarmiento.github.io/GEIH2018_sample/ the
-# objective is to retrive 10 chunks of data from the website
-# corresponding to a sample of GEIH 2018. Each one would be
-# stored in a individual csv file.
+# Description: This script cleans and prepares the data
+obtained from the webscrapping process. This process included:
+filtering observations corresponding to employed adults,
+removing variables containing very little information,
+transforming existing variables, and creating new variables
+relevant for the next analyses.
 #
 # Date: 09/02/2025
 ##########################################################
