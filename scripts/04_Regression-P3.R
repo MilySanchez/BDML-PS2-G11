@@ -1,10 +1,10 @@
 ##########################################################
 # Title: Exercise Number 3 Regression Wage ~ age.
-# Description: This script webscrapes the data from the website
-# https://ignaciomsarmiento.github.io/GEIH2018_sample/ the
-# objective is to retrive 10 chunks of data from the website
-# corresponding to a sample of GEIH 2018. Each one would be
-# stored in a individual csv file.
+# Description: This script performs a regression analysis 
+# of wages on age using a quadratic specification. 
+# It estimates the peak age at which wages are maximized, 
+# applies a bootstrap procedure to derive 
+# confidence intervals, and visualizes the results.
 #
 # Date: 09/02/2025
 ##########################################################
@@ -43,7 +43,7 @@ data_clean <- data_clean %>% mutate(logwage=log(ingtot_H), age2=age^2)
 # REGRESSION
 reg1 <- lm(logwage~age+age2, data=data_clean)
 
-stargazer(reg1,summary = F)
+stargazer(reg1,summary = F, out=file.path(dir$views,'reg1.txt'))
 
 ggplot(data_clean, aes(x = age, y = logwage)) +
   geom_point(alpha = 0.5) +  
