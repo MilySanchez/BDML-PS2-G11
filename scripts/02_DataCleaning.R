@@ -59,10 +59,9 @@ filter_columns <- skim_result[skim_result$complete_rate >= 0.7, ] %>% select(ski
 # COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (42 variables)
 db_geih <- db_geih %>% select(all_of(filter_columns)) 
 
-# TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES
+# TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES AND WAGE BY HOUR
 db_geih <- db_geih %>% mutate(sex=as.factor(sex),
                                   estrato1=as.factor(estrato1),
-                                  age=as.factor(age),
                                   p6050=as.factor(p6050),
                                   p6090=as.factor(p6090),
                                   p6100=as.factor(p6100),
@@ -79,11 +78,13 @@ db_geih <- db_geih %>% mutate(sex=as.factor(sex),
                                   dsi=as.factor(dsi),
                                   pea=as.factor(pea),
                                   inac=as.factor(inac),
-                                  formal=as.factor(formal)
+                                  formal=as.factor(formal),
+                                  oficio=as.factor(oficio),
+                                  ingtot_H=ingtot/totalHoursWorked
 )
 
 # REMOVE DUPLICATE COLUMNS
-db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac))
+db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac,p6920,pea,informal,p7070,maxEducLevel,sizeFirm))
 
 # FILTER WAGE > 0
 db_geih <- db_geih %>% filter(ingtot>0)

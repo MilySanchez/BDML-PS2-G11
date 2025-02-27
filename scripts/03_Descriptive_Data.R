@@ -41,26 +41,7 @@ db_geih <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 skim_result <- skim(db_geih |>select(-c(dominio,...1,directorio,secuencia_p,orden)))
 
 #save the descriptive table in a txt file
-skim_result <- as.data.frame(skim_result)|>
-  select(-c(n_missing, complete_rate,skim_type))|> 
-  arrange(skim_variable) |>
-  mutate(across(matches("^numeric\\.(mean|sd|p0|p25|p50|p75|p100)$"), ~ round(.))) |>
-  rename (
-    variable = skim_variable,
-    mean = numeric.mean,
-    sd = numeric.sd,
-    p0 = numeric.p0,
-    p25 = numeric.p25,
-    p50 = numeric.p50,
-    p75 = numeric.p75,
-    p100 = numeric.p100,
-    hist = numeric.hist
-  )
-
-stargazer(skim_result, summary=F, type="text",out = file.path(dir$views,'data_description.txt'))
-
-stargazer(skim_result, summary=F, out = file.path(dir$views,'data_description.txt'))
-
+stargazer(as.data.frame(skim_result), summary=F, type="text",out = file.path(dir$views,'data_description.txt'))
 
 #create a new df containing just discrete data
 db_geih_discrete <- db_geih |> select(p6870, p6050, relab, estrato1, p6240, regSalud,
