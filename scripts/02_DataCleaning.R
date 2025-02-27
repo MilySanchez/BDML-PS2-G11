@@ -54,11 +54,11 @@ db_geih <- db_geih %>% filter(age>=18,ocu==1)
 skim_result <- skim(db_geih)
 
 
-filter_columns <- skim_result[skim_result$complete_rate >= 0.7, ] %>% select(skim_variable) %>% pull()
+filter_columns <- skim_result[skim_result$complete_rate >= 0.5, ] %>% select(skim_variable) %>% pull()
 
 
 # COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (42 variables)
-db_geih <- db_geih %>% select(all_of(filter_columns)) 
+db_geih <- db_geih %>% select(all_of(filter_columns))
 
 # TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES AND WAGE BY HOUR
 db_geih <- db_geih %>% mutate(sex=as.factor(sex),
@@ -86,7 +86,7 @@ db_geih <- db_geih %>% mutate(sex=as.factor(sex),
 )
 
 # REMOVE DUPLICATE COLUMNS
-db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac,p6920,pea,informal,p7070,maxEducLevel,sizeFirm))
+db_geih <- db_geih %>% select(-c(p6100,pet,dsi,inac,p6920,pea,informal,p7070,maxEducLevel,sizeFirm))
 
 # FILTER WAGE > 0
 db_geih <- db_geih %>% filter(ingtot>0)
@@ -106,7 +106,7 @@ db_geih <- db_geih %>%
   mutate(age=as.numeric(age))
 
 # SAVE DATA CLEAN
-write.csv(db_geih, file.path(dir$processed, paste0("data_cleanGEIH", ".csv")), row.names = F)
+write.csv(db_geih, file.path(dir$processed, paste0("data_cleanGEIH2", ".csv")), row.names = F)
 
 
 
