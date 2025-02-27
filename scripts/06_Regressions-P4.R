@@ -36,9 +36,11 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 # Load clean data
-data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
+
+data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH2.csv'))
 
 # Check the names of the variables
+
 colnames(data_clean)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -46,10 +48,12 @@ colnames(data_clean)
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 # regression between wage and the gender dichotomous variable
+
 reg_simple <- lm(logwage ~ female, data = data_clean)
 stargazer(reg_simple, type = 'latex')
 
 # regression between wage and gender, controlling by characteristics of workers
+
 reg_multi <- lm(logwage ~ female + age + age2 + relab + p6426 + 
                   p6870 + regSalud + p6210 + regSalud + cotPension + 
                   formal + p7495 + p7505, data = data_clean)
@@ -60,18 +64,21 @@ stargazer(reg_multi, type = 'latex', keep = 'female')
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 # regress logwage on all control variables
+
 reg_y <- lm(logwage ~ age + age2 + relab + p6426 + p6870 + regSalud + 
               p6210 + cotPension + formal + p7495 + p7505, 
             data = data_clean)
 resid_y <- resid(reg_y)
 
 # regress female on all control variables
+
 reg_x <- lm(female ~ age + age2 + relab + p6426 + p6870 + regSalud + 
               p6210 + cotPension + formal + p7495 + p7505, 
             data = data_clean)
 resid_x <- resid(reg_x)
 
-# regress residuals
+# regress the residuals
+
 reg_FWL <- lm(resid_y ~ resid_x)
 stargazer(reg_FWL, type = 'latex')
 
@@ -79,23 +86,32 @@ stargazer(reg_FWL, type = 'latex')
 # 4. Estimate the conditional wage gap using FWL with bootstrap ===============
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-# solo bootstrap?
-pacman::p_load(boot)
+# create function that estimates the coefficients using FWL
 
 fn_coef <- function(data, index){
-  model <- lm(logwage ~ female + age + age2 + relab + p6426 + 
-                p6870 + regSalud + p6210 + regSalud + cotPension + 
-                formal + p7495 + p7505, data = data, subset = index)
-  return(coef(model)['female'])
+  reg_y <- lm(logwage ~ age + age2 + relab + p6426 + p6870 + regSalud + 
+                p6210 + cotPension + formal + p7495 + p7505, 
+              data = data_clean)
+  resid_y <- resid(reg_y)
+  reg_x <- lm(female ~ age + age2 + relab + p6426 + p6870 + regSalud + 
+                p6210 + cotPension + formal + p7495 + p7505, 
+              data = data_clean)
+  resid_x <- resid(reg_x)
+  reg_FWL <- lm(resid_y ~ resid_x)
+  return(coef(reg_FWL)['female'])
 }
+
+# check the function works well
 
 fn_coef(data_clean, 1:nrow(data_clean))
 
+# set seed to achieve reproducibility
+
 set.seed(111)
 
-boot_result <- boot(data = data_clean, statistic = fn_coef, R = 1000)
+# use boot 
 
-boot.ci(boot_result, type = 'perc')
+boot_result <- boot(data = data_clean, statistic = fn_coef, R = 1000)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 5. Plot the predicted age-wage profile ======================================
