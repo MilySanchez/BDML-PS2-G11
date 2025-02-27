@@ -85,8 +85,7 @@ stargazer(reg_simple5, type = 'text')
 
 # regression between wage and gender, controlling by characteristics of workers
 
-#data_clean <- data_clean %>% mutate(female = as.factor(female),
-#                                    estrato1 = as.factor(estrato1),
+#data_clean <- data_clean %>% mutate(estrato1 = as.factor(estrato1),
 #                                    relab = as.factor(relab),
 #                                    p6240 = as.factor(p6240),
 #                                    p6870 = as.factor(p6870),
@@ -107,9 +106,14 @@ reg_multi <- lm(logwage ~ female + age + age2 + estrato1 + p6240 +
                   p7040 + p7495 + p7505, data = data_clean)
 stargazer(reg_multi, type = 'text')
 
+reg_multi_inter <- lm(logwage ~ female*age + female*age2 + estrato1 + p6240 + 
+                        p6426 + p6870 + regSalud + p6210 + cotPension + 
+                        p7040 + p7495 + p7505, data = data_clean)
+stargazer(reg_multi_inter, type = 'text')
+
 reg_multi2 <- lm(l_impa ~ female + age + age2 + estrato1 + p6240 + 
-                  p6426 + p6870 + regSalud + p6210 + cotPension + 
-                  p7040 + p7495 + p7505, data = data_clean)
+                   p6426 + p6870 + regSalud + p6210 + cotPension + 
+                   p7040 + p7495 + p7505, data = data_clean)
 stargazer(reg_multi2, type = 'text')
 
 reg_multi3 <- lm(l_ysalaryhu ~ female + age + age2 + estrato1 + p6240 + 
@@ -123,22 +127,22 @@ stargazer(reg_multi3, type = 'text')
 
 # regress logwage on all control variables
 
-reg_y <- lm(logwage ~ age + age2 + relab + p6426 + p6870 + regSalud + 
-              p6210 + cotPension + formal + p7495 + p7505, 
-            data = data_clean)
+reg_y <- lm(logwage ~ age + age2 + estrato1 + p6240 + 
+              p6426 + p6870 + regSalud + p6210 + cotPension + 
+              p7040 + p7495 + p7505, data = data_clean)
 resid_y <- resid(reg_y)
 
 # regress female on all control variables
 
-reg_x <- lm(female ~ age + age2 + relab + p6426 + p6870 + regSalud + 
-              p6210 + cotPension + formal + p7495 + p7505, 
-            data = data_clean)
+reg_x <- lm(female ~ age + age2 + estrato1 + p6240 + 
+              p6426 + p6870 + regSalud + p6210 + cotPension + 
+              p7040 + p7495 + p7505, data = data_clean)
 resid_x <- resid(reg_x)
 
 # regress the residuals
 
 reg_FWL <- lm(resid_y ~ resid_x)
-stargazer(reg_FWL, type = 'latex')
+stargazer(reg_FWL, type = 'text')
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 4. Estimate the conditional wage gap using FWL with bootstrap ===============
@@ -146,22 +150,18 @@ stargazer(reg_FWL, type = 'latex')
 
 # create function that estimates the coefficients using FWL
 
-fn_coef <- function(data, index){
-  reg_y <- lm(logwage ~ age + age2 + relab + p6426 + p6870 + regSalud + 
-                p6210 + cotPension + formal + p7495 + p7505, 
-              data = data_clean)
+fn_fwl <- function(data, index){
+  reg_y <- lm(logwage ~ age + age2 + estrato1 + p6240 + 
+                p6426 + p6870 + regSalud + p6210 + cotPension + 
+                p7040 + p7495 + p7505, data = data[index, ])
   resid_y <- resid(reg_y)
-  reg_x <- lm(female ~ age + age2 + relab + p6426 + p6870 + regSalud + 
-                p6210 + cotPension + formal + p7495 + p7505, 
-              data = data_clean)
+  reg_x <- lm(female ~ age + age2 + estrato1 + p6240 + 
+                p6426 + p6870 + regSalud + p6210 + cotPension + 
+                p7040 + p7495 + p7505, data = data[index, ])
   resid_x <- resid(reg_x)
-  reg_FWL <- lm(resid_y ~ resid_x)
-  return(coef(reg_FWL)['female'])
+  reg_fwl <- lm(resid_y ~ resid_x)
+  return(coef(reg_fwl)['resid_x'])
 }
-
-# check the function works well
-
-fn_coef(data_clean, 1:nrow(data_clean))
 
 # set seed to achieve reproducibility
 
@@ -169,10 +169,43 @@ set.seed(111)
 
 # use boot 
 
-boot_result <- boot(data = data_clean, statistic = fn_coef, R = 1000)
+bootstrap <- boot(data = data_clean, statistic = fn_fwl, R = 1000)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 5. Plot the predicted age-wage profile ======================================
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
+ages <- seq(18, max(data_clean$age, na.rm = T), length.out = 75)
 
+data_men <- data.frame(female = 0,
+                       age = ages,
+                       age2 = ages^2,
+                       estrato1 = 2,
+                       p6240 = 1,
+                       p6426 = mean(data_clean$p6426, na.rm = T),
+                       p6870 = 9,
+                       regSalud = 1,
+                       p6210 = 6,
+                       cotPension = 1,
+                       p7040 = 2,
+                       p7495 = 2,
+                       p7505 = 2)
+
+data_women <- data.frame(female = 1,
+                         age = ages,
+                         age2 = ages^2,
+                         estrato1 = 2,
+                         p6240 = 1,
+                         p6426 = mean(data_clean$p6426, na.rm = T),
+                         p6870 = 9,
+                         regSalud = 1,
+                         p6210 = 6,
+                         cotPension = 1,
+                         p7040 = 2,
+                         p7495 = 2,
+                         p7505 = 2)
+
+data_men$logwage_predicted <- predict(reg_multi_inter, newdata = data_men)
+data_women$logwage_predicted <- predict(reg_multi_inter, newdata = data_women)
+
+df_plot <- bind_rows()
