@@ -91,7 +91,13 @@ db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac,p6920,pea,informal,p
 db_geih <- db_geih %>% filter(ingtot>0)
 
 # CONVERT WAGE TO LOG AND CREATE SQUEARED AGE
-data_clean <- data_clean %>% mutate(logwage=log(ingtot_H), age2=age^2)
+db_geih <- db_geih %>% mutate(logwage=log(ingtot_H), age2=age^2)
+
+# RELEVEL COTPENSION
+db_geih <- db_geih %>% mutate(cotPension = relevel(cotPension, ref = 2))
+
+# CREATE FEMALE VARIABLE
+db_geih <- db_geih %>% mutate(female = ifelse(sex == 0, 1, 0))
 
 # AVERAGES-MEANS OF NUMERICAL VARIABLES ON NAS
 db_geih <- db_geih %>%
