@@ -2,11 +2,11 @@
 ##########################################################
 # Title: Data Cleaning.
 # Description: This script cleans and prepares the data
-obtained from the webscrapping process. This process included:
-filtering observations corresponding to employed adults,
-removing variables containing very little information,
-transforming existing variables, and creating new variables
-relevant for the next analyses.
+# obtained from the webscrapping process. This process included:
+# filtering observations corresponding to employed adults,
+# removing variables containing very little information,
+# transforming existing variables, and creating new variables
+# relevant for the next analyses.
 #
 # Date: 09/02/2025
 ##########################################################
@@ -81,6 +81,7 @@ db_geih <- db_geih %>% mutate(sex=as.factor(sex),
                                   inac=as.factor(inac),
                                   formal=as.factor(formal),
                                   oficio=as.factor(oficio),
+                                  cotPension=as.factor(cotPension),
                                   ingtot_H=ingtot/totalHoursWorked
 )
 
