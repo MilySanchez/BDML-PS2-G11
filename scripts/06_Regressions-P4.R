@@ -175,7 +175,11 @@ bootstrap <- boot(data = data_clean, statistic = fn_fwl, R = 1000)
 # 5. Plot the predicted age-wage profile ======================================
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
+# create a range of ages for the plot
+
 ages <- seq(18, max(data_clean$age, na.rm = T), length.out = 75)
+
+# create two dataframes, one for men and one for women
 
 data_men <- data.frame(female = 0,
                        age = ages,
@@ -205,7 +209,51 @@ data_women <- data.frame(female = 1,
                          p7495 = 2,
                          p7505 = 2)
 
+# predict the wage (log) by gender based on the previous multiple regression
+
 data_men$logwage_predicted <- predict(reg_multi_inter, newdata = data_men)
 data_women$logwage_predicted <- predict(reg_multi_inter, newdata = data_women)
 
-df_plot <- bind_rows()
+# create a whole dataframe, combining men and women data, to be able to plot
+
+df_plot <- bind_rows(data_men %>% mutate(gender = 'Men'),
+                     data_women %>% mutate(gender = 'Women')
+                     )
+
+# plot the predicted age-wage profile by gender
+
+ggplot(df_plot, aes(x = age, y = logwage_predicted, color = gender)) + 
+  geom_line(size = 1) + labs(title = 'Predicted Age-Wage Profile by Gender',
+                             x = 'Age', y = 'Log(Wage)') +
+  theme_minimal()
+
+# save the coefficients of the multiple regression
+
+coefs <- coefficients(reg_multi_inter)
+
+# calculate the peak ages for each gender with the derivative of age=0
+
+peak_age_men <- -1*coefs['age'] / (2*coefs['age2'])
+peak_age_women <- -1*(coefs['age'] + coefs['female:age']) / 
+  (2*(coefs['age2'] + coefs['female:age2']))
+
+# Build confidence intervals using bootstrap
+
+fn_peaks <- function(data, index) {
+  reg_boot <- lm(logwage ~ female*age + female*age2 + estrato1 + p6240 + 
+                   p6426 + p6870 + regSalud + p6210 + cotPension + 
+                   p7040 + p7495 + p7505, data = data[index, ])
+  coefs <- coef(reg_boot)
+  peak_age_men <- -1*coefs['age'] / (2*coefs['age2'])
+  peak_age_women <- -1*(coefs['age'] + coefs['female:age']) / 
+    (2*(coefs['age2'] + coefs['female:age2']))
+  return(c(peak_age_men, peak_age_women))
+}
+
+set.seed(111)
+
+peaks_boot <- boot(data = data_clean, statistic = fn_peaks, R = 1000)
+
+ci_men <- boot.ci(peaks_boot, index = 1, type = 'perc')
+ci_women <- boot.ci(peaks_boot, index = 2, type = 'perc')
+
