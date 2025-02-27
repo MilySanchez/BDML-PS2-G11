@@ -90,6 +90,9 @@ db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac,p6920,pea,informal,p
 # FILTER WAGE > 0
 db_geih <- db_geih %>% filter(ingtot>0)
 
+# CONVERT WAGE TO LOG AND CREATE SQUEARED AGE
+data_clean <- data_clean %>% mutate(logwage=log(ingtot_H), age2=age^2)
+
 # AVERAGES-MEANS OF NUMERICAL VARIABLES ON NAS
 db_geih <- db_geih %>%
   mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) %>% 
