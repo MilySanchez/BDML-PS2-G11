@@ -1,11 +1,12 @@
 
 ##########################################################
 # Title: Data Cleaning.
-# Description: This script webscrapes the data from the website
-# https://ignaciomsarmiento.github.io/GEIH2018_sample/ the
-# objective is to retrive 10 chunks of data from the website
-# corresponding to a sample of GEIH 2018. Each one would be
-# stored in a individual csv file.
+# Description: This script cleans and prepares the data
+# obtained from the webscrapping process. This process included:
+# filtering observations corresponding to employed adults,
+# removing variables containing very little information,
+# transforming existing variables, and creating new variables
+# relevant for the next analyses.
 #
 # Date: 09/02/2025
 ##########################################################
@@ -53,11 +54,11 @@ db_geih <- db_geih %>% filter(age>=18,ocu==1)
 skim_result <- skim(db_geih)
 
 
-filter_columns <- skim_result[skim_result$complete_rate >= 0.7, ] %>% select(skim_variable) %>% pull()
+filter_columns <- skim_result[skim_result$complete_rate >= 0.5, ] %>% select(skim_variable) %>% pull()
 
 
 # COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (42 variables)
-db_geih <- db_geih %>% select(all_of(filter_columns)) 
+db_geih <- db_geih %>% select(all_of(filter_columns))
 
 # TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES AND WAGE BY HOUR
 db_geih <- db_geih %>% mutate(sex=as.factor(sex),
@@ -80,14 +81,24 @@ db_geih <- db_geih %>% mutate(sex=as.factor(sex),
                                   inac=as.factor(inac),
                                   formal=as.factor(formal),
                                   oficio=as.factor(oficio),
+                                  cotPension=as.factor(cotPension),
                                   ingtot_H=ingtot/totalHoursWorked
 )
 
 # REMOVE DUPLICATE COLUMNS
-db_geih <- db_geih %>% select(-c(p6100,pet,wap,ocu,dsi,inac,p6920,pea,informal,p7070,maxEducLevel,sizeFirm))
+db_geih <- db_geih %>% select(-c(p6100,pet,dsi,inac,p6920,pea,informal,p7070,maxEducLevel,sizeFirm))
 
 # FILTER WAGE > 0
 db_geih <- db_geih %>% filter(ingtot>0)
+
+# CONVERT WAGE TO LOG AND CREATE SQUEARED AGE
+db_geih <- db_geih %>% mutate(logwage=log(ingtot_H), age2=age^2)
+
+# RELEVEL COTPENSION
+db_geih <- db_geih %>% mutate(cotPension = relevel(cotPension, ref = 2))
+
+# CREATE FEMALE VARIABLE
+db_geih <- db_geih %>% mutate(female = ifelse(sex == 0, 1, 0))
 
 # AVERAGES-MEANS OF NUMERICAL VARIABLES ON NAS
 db_geih <- db_geih %>%
@@ -95,7 +106,7 @@ db_geih <- db_geih %>%
   mutate(age=as.numeric(age))
 
 # SAVE DATA CLEAN
-write.csv(db_geih, file.path(dir$processed, paste0("data_cleanGEIH", ".csv")), row.names = F)
+write.csv(db_geih, file.path(dir$processed, paste0("data_cleanGEIH2", ".csv")), row.names = F)
 
 
 

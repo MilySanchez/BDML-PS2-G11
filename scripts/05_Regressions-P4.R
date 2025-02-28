@@ -19,7 +19,7 @@ dir <- list()
 dir$root <- getwd()
 dir$processed <- file.path(dir$root, "stores", "processed")
 dir$raw <- file.path(dir$root, "stores", "raw")
-dir$views <- file.path(dir$root, "views","P4_Gender-earnings-GAP")
+dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
 setwd(dir$root)
 
@@ -49,26 +49,53 @@ colnames(data_clean)
 data_clean <- data_clean %>% mutate(logwage=log(ingtot_H),
                                     age2=age^2)
 
+# CONVERT CATEGORIC VARIABLES AS FACTOR
 data_clean <- data_clean %>% mutate(oficio = as.factor(oficio),
                                     relab = as.factor(relab),
-                                    maxEducLevel = as.factor(p6210),
+                                    p6210 = as.factor(p6210),
                                     regSalud = as.factor(regSalud),
-                                    cotPension = as.factor(cotPension),
-                                    college = as.factor(college),
-                                    cuentaPropia = as.factor(cuentaPropia))
+                                    cotPension = as.factor(cotPension))
+
+# RELEVEL SOME VARIABLES
+data_clean <- data_clean %>% mutate(cotPension = relevel(cotPension, 
+                                                         ref = 2))
+
+# CREATE FEMALE VARIABLE
+data_clean <- data_clean %>% mutate(female = ifelse(sex == 0, 1, 0))
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-# 3. Run regressions wage vs sex ===============================================
+# 3. Estimate the wage gap with OLS (unconditional and conditional) ===========
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 # regression between wage and the gender dichotomous variable
-reg_simple <- lm(logwage ~ sex, data = data_clean)
-stargazer(reg_simple, type = 'latex', out = file.path(dir$views,'reg_simple.txt'))
+
+reg_simple <- lm(logwage ~ female, data = data_clean)
+stargazer(reg_simple, type = 'latex')
+
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+# 4. Estimate the conditional wage gap using FWL ==============================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+
+# regress logwage on all control variables
+reg_y <- lm(logwage ~ age + age2 + relab + p6426 + p6870 + regSalud + 
+                 p6210 + cotPension + formal + p7495 + p7505, 
+               data = data_clean)
+resid_y <- resid(reg_y)
+
+# regress female on all control variables
+reg_x <- lm(female ~ age + age2 + relab + p6426 + p6870 + regSalud + 
+              p6210 + cotPension + formal + p7495 + p7505, 
+            data = data_clean)
+resid_x <- resid(reg_x)
+
+# regress residuals
+reg_FWL <- lm(resid_y ~ resid_x)
+stargazer(reg_FWL, type = 'latex')
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 4. Run regressions wage vs sex with controls ================================
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-# as a function
 
 resid_logwage <- residuals(lm(logwage ~  oficio + relab + p6426 + 
                                 maxEducLevel + p6870 + regSalud + 

@@ -37,9 +37,6 @@ data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 
 ## 3
 
-# CONVERT TO HOUR WAGE AND LOG
-data_clean <- data_clean %>% mutate(logwage=log(ingtot_H), age2=age^2)
-
 # REGRESSION
 reg1 <- lm(logwage~age+age2, data=data_clean)
 
