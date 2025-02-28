@@ -17,13 +17,8 @@ rm(list = ls())
 
 dir <- list()
 dir$root <- getwd()
-<<<<<<< HEAD:scripts/06 Regressions P4.R
-dir$raw <- file.path(dir$root, "stores", "raw")
-dir$processed <- file.path(dir$root, "stores", "processed")
-=======
 dir$processed <- file.path(dir$root, "stores", "processed")
 dir$raw <- file.path(dir$root, "stores", "raw")
->>>>>>> 3fda53ddd0d89381de00b38447b287bd7e7e8bbd:scripts/05_Regressions-P4.R
 dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
 setwd(dir$root)
@@ -31,6 +26,10 @@ setwd(dir$root)
 # Load required libraries
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
+
+# Set seed
+
+set.seed(123)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
 # 1. Load data =================================================================
@@ -69,15 +68,10 @@ data_clean <- data_clean %>% mutate(female = ifelse(sex == 0, 1, 0))
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 # regression between wage and the gender dichotomous variable
+
 reg_simple <- lm(logwage ~ female, data = data_clean)
 stargazer(reg_simple, type = 'latex')
 
-<<<<<<< HEAD:scripts/06 Regressions P4.R
-# regression between wage and gender, controlling by characteristics of workers
-reg_multi <- lm(logwage ~ female + age + age2 + relab + p6426 + 
-                  p6870 + regSalud + p6210 + regSalud + cotPension + 
-                  formal + p7495 + p7505, data = data_clean)
-stargazer(reg_multi, type = 'latex', keep = 'female')
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 4. Estimate the conditional wage gap using FWL ==============================
@@ -100,24 +94,78 @@ reg_FWL <- lm(resid_y ~ resid_x)
 stargazer(reg_FWL, type = 'latex')
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-# 5. Estimate the conditional wage gap using FWL with bootstrap ===============
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-=======
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 4. Run regressions wage vs sex with controls ================================
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
->>>>>>> 3fda53ddd0d89381de00b38447b287bd7e7e8bbd:scripts/05_Regressions-P4.R
 
-resid_logwage <- residuals(lm(logwage ~ age + age2 + oficio + relab + p6426 + 
+resid_logwage <- residuals(lm(logwage ~  oficio + relab + p6426 + 
                                 maxEducLevel + p6870 + regSalud + 
                                 college + regSalud + cotPension + formal + 
                                 cuentaPropia + p7495 + p7505, data = data_clean))
 
 # Regress sex on all control variables (excluding logwage)
-resid_sex <- residuals(lm(sex ~ age + age2 + oficio + relab + p6426 + 
+resid_sex <- residuals(lm(sex ~ oficio + relab + p6426 + 
                             maxEducLevel + p6870 + regSalud + 
                             college + regSalud + cotPension + formal + 
                             cuentaPropia + p7495 + p7505, data = data_clean))
 
+resid_age <- residuals(lm(age ~ oficio + relab + p6426 + 
+                            maxEducLevel + p6870 + regSalud + 
+                            college + regSalud + cotPension + formal + 
+                            cuentaPropia + p7495 + p7505, data = data_clean))
+
+resid_age2 <- residuals(lm(age2 ~ oficio + relab + p6426 + 
+                             maxEducLevel + p6870 + regSalud + 
+                             college + regSalud + cotPension + formal + 
+                             cuentaPropia + p7495 + p7505, data = data_clean))
+
 # Regress residuals of logwage on residuals of sex
-reg_multiple <- lm(resid_logwage ~ resid_sex)
+reg_multiple <- lm(resid_logwage ~ resid_sex + resid_age + resid_age2)
+stargazer(reg_multiple, type = 'latex', out = file.path(dir$views,'reg_multiple.txt'))
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+# 5. Comparison between standard errors ================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+
+# Bootstrap standard errors
+
+# Number of bootstrap samples
+B <- 1000
+
+fn_reg_wage_gap <- function(data, index) {
+  # Resample the data
+  boot_sample <- data[index, ]
+  
+  # Obtain residuals from first-stage regressions
+  resid_logwage <- residuals(lm(logwage ~ age + age2 + oficio + relab + p6426 + 
+                                  maxEducLevel + p6870 + regSalud + 
+                                  college + regSalud + cotPension + formal + 
+                                  cuentaPropia + p7495 + p7505, data = boot_sample))
+  
+  resid_sex <- residuals(lm(sex ~ age + age2 + oficio + relab + p6426 + 
+                              maxEducLevel + p6870 + regSalud + 
+                              college + regSalud + cotPension + formal + 
+                              cuentaPropia + p7495 + p7505, data = boot_sample))
+  
+  # Run regression on residuals
+  reg_boot <- lm(resid_logwage ~ resid_sex)
+  
+  # Return the coefficient of resid_sex
+  return(coef(reg_boot))
+}
+
+boot_reg_wage_gap <- boot(data_clean, statistic = fn_reg_wage_gap, R = B)
+
+# Obtain the standard errors
+se_boot_intercept <- sd(boot_reg_wage_gap$t[, 1])  # Intercept SE
+se_boot_sex <- sd(boot_reg_wage_gap$t[, 2])  # resid_sex SE
+
+stargazer(reg_multiple, type = 'latex', out = file.path(dir$views,'reg_multiple_boot.txt'),
+          se = list(c(se_boot_intercept,se_boot_sex)))
+
+# Drop boot because it is not used anymore and it is a large object
+rm(boot_reg_wage_gap)
+
+
+
+
+
