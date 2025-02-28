@@ -101,6 +101,9 @@ tabla_porcentajes[is.na(tabla_porcentajes)] <- ""
 #save the result table in a txt file
 stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, type="text", out=file.path(dir$views,'discrete_description.txt'))
 
+stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, out=file.path(dir$views,'discrete_description.txt'))
+
+
 #create a correlation graph for each variable
 corr_graph <- db_geih |>
   select_if(is.numeric) |> 

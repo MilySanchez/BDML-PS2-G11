@@ -54,7 +54,7 @@ db_geih <- db_geih %>% filter(age>=18,ocu==1)
 skim_result <- skim(db_geih)
 
 
-filter_columns <- skim_result[skim_result$complete_rate >= 0.5, ] %>% select(skim_variable) %>% pull()
+filter_columns <- skim_result[skim_result$complete_rate >= 0.7, ] %>% select(skim_variable) %>% pull()
 
 
 # COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (42 variables)
@@ -106,7 +106,7 @@ db_geih <- db_geih %>%
   mutate(age=as.numeric(age))
 
 # SAVE DATA CLEAN
-write.csv(db_geih, file.path(dir$processed, paste0("data_cleanGEIH2", ".csv")), row.names = F)
+write.csv(db_geih, file.path(dir$processed, paste0("data_cleanGEIH", ".csv")), row.names = F)
 
 
 
