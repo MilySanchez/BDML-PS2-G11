@@ -165,9 +165,7 @@ stargazer(reg_multiple, type = 'latex', out = file.path(dir$views,'reg_multiple_
 # Drop boot because it is not used anymore and it is a large object
 rm(boot_reg_wage_gap)
 
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-# 5. Graph predicted log(wage) ================================
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+
 
 
 
