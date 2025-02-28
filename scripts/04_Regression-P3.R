@@ -37,6 +37,9 @@ data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 
 ## 3
 
+# CONVERT TO HOUR WAGE AND LOG
+data_clean <- data_clean %>% mutate(logwage=log(ingtot_H), age2=age^2)
+
 # REGRESSION
 reg1 <- lm(logwage~age+age2, data=data_clean)
 
@@ -45,7 +48,7 @@ stargazer(reg1,summary = F, out=file.path(dir$views,'reg1.txt'))
 ggplot(data_clean, aes(x = age, y = logwage)) +
   geom_point(alpha = 0.5) +  
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red", se = TRUE) +
-  labs(title = "Regresión",
+  labs(title = "Regresión de ingresos por edad",
        x = "Age",
        y = "log(W)") +
   theme_minimal()
@@ -62,7 +65,7 @@ PEAK_AGE_bootstrap <- function(data, indicator) {
   beta_1_resampled <- coef(reg_resampled)[2]
   beta_2_resampled <- coef(reg_resampled)[3]
   peak_age_resampled <- -beta_1_resampled / (2 * beta_2_resampled)
-  return(edad_pico_resampled)
+  return(peak_age_resampled)
 }
 
 # Do boostrap (1000 times)
