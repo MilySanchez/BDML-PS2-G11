@@ -134,17 +134,26 @@ stargazer(reg_FWL, reg_FWL_inter, type = 'text')
 
 # create function that estimates the coefficients using FWL
 
-fn_fwl <- function(data, index){
-  reg_y <- lm(logwage ~ age + age2 + estrato1 + p6240 + 
+age_bar = mean(data_clean$age)
+
+fn_fwl <- function(data, index, age_bar) {
+  reg_y <- lm(logwage ~ age + age2 + female*age + estrato1 + p6240 + 
                 p6426 + p6870 + regSalud + p6210 + cotPension + 
                 p7040 + p7495 + p7505, data = data[index, ])
   resid_y <- resid(reg_y)
-  reg_x <- lm(female ~ age + age2 + estrato1 + p6240 + 
+  reg_x <- lm(female ~ age + age2 + female*age + estrato1 + p6240 + 
                 p6426 + p6870 + regSalud + p6210 + cotPension + 
                 p7040 + p7495 + p7505, data = data[index, ])
   resid_x <- resid(reg_x)
   reg_fwl <- lm(resid_y ~ resid_x)
-  return(coef(reg_fwl)['resid_x'])
+  full_model <- lm(logwage ~ age + age2 + female + female*age + 
+                          estrato1 + p6240 + p6426 + p6870 + regSalud + 
+                          p6210 + cotPension + p7040 + p7495 + p7505 + 
+                          relab, data = data[index, ])
+  b3 <- full_model$coefficients[4]
+  b4 <- full_model$coefficients[5]
+  wage_gap <- b3 + b4*age_bar
+  return(wage_gap)
 }
 
 # set seed to achieve reproducibility
@@ -154,31 +163,6 @@ set.seed(111)
 # use boot 
 
 bootstrap <- boot(data = data_clean, statistic = fn_fwl, R = 1000)
-
-
-coefs <- reg_multi_inter$coef
-b0<-coefs[1] 
-b1<-coefs[2]
-b2<-coefs[3] 
-b3<-coefs[4]
-b4<-coefs[5]
-age_bar <- mean(data_clean$age)
-wage_gap <- b3 + b4*age_bar
-
-fn_fwl_inter <- function(data, index, age_bar) {
-  reg <- lm(logwage ~ age + age2 + female + female*age + 
-              estrato1 + p6240 + p6426 + p6870 + regSalud + 
-              p6210 + cotPension + p7040 + p7495 + p7505 + 
-              relab, data = data_clean, subset = index)
-  b3 <- reg$coefficients[4]
-  b4 <- reg$coefficients[5]
-  wage_gap <- b3 + b4*age_bar
-  return(wage_gap)
-}
-
-fn_fwl_inter(data_clean, 1:nrow(data_clean))
-
-boot_results <- boot(data = data_clean, fn_fwl_inter, R = 1000)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 5. Plot the predicted age-wage profile ======================================
