@@ -37,15 +37,11 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 
 # Load clean data
 
-data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH2.csv'))
+data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 
 # Check the names of the variables
 
 colnames(data_clean)
-
-#data_num <- data_clean %>% select(where(is.double))
-#corrs <- cor(data_num, use = "complete.obs")
-#corrplot(corrs, method = 'square', type = 'lower', diag = F, tl.cex = 0.6)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 2. Estimate the wage gap with OLS (unconditional and conditional) ===========
@@ -53,35 +49,15 @@ colnames(data_clean)
 
 # regression between wage and the gender dichotomous variable
 
-reg_simple <- lm(logwage ~ female, data = data_clean)
-stargazer(reg_simple, type = 'text')
+reg_simple1 <- lm(logwage ~ female, data = data_clean)
 
 #data_clean <- data_clean %>%
-#  filter(impa > 0,
-#         p6500 > 0,
-#         y_salary_m > 0,
-#         y_salary_m_hu > 0,
-#         y_ingLab_m > 0,
-#         y_ingLab_m_ha > 0) %>% 
-#  mutate(impah = impa / (totalHoursWorked*4),
-#         p6500h = p6500 / (totalHoursWorked*4),
-#         salarymh = y_salary_m / (totalHoursWorked*4)) %>% 
-#  mutate(l_impa = log(impah),
-#         l_p6500 = log(p6500h),
-#         l_ysalarym = log(salarymh),
-#         l_ysalaryhu = log(y_salary_m_hu))
+#  filter(impa > 0) %>% 
+#  mutate(impah = impa / (totalHoursWorked*4)) %>% 
+#  mutate(l_impa = log(impah))
 
 reg_simple2 <- lm(l_impa ~ female, data = data_clean)
-stargazer(reg_simple2, type = 'text')
-
-reg_simple3 <- lm(l_p6500 ~ female, data = data_clean)
-stargazer(reg_simple3, type = 'text')
-
-reg_simple4 <- lm(l_ysalarym ~ female, data = data_clean)
-stargazer(reg_simple4, type = 'text')
-
-reg_simple5 <- lm(l_ysalaryhu ~ female, data = data_clean)
-stargazer(reg_simple5, type = 'text')
+stargazer(reg_simple, reg_simple2, type = 'text')
 
 # regression between wage and gender, controlling by characteristics of workers
 
@@ -103,23 +79,19 @@ stargazer(reg_simple5, type = 'text')
 
 reg_multi <- lm(logwage ~ female + age + age2 + estrato1 + p6240 + 
                   p6426 + p6870 + regSalud + p6210 + cotPension + 
-                  p7040 + p7495 + p7505, data = data_clean)
+                  p7040 + p7495 + p7505 + relab, data = data_clean)
 stargazer(reg_multi, type = 'text')
 
-reg_multi_inter <- lm(logwage ~ female*age + female*age2 + estrato1 + p6240 + 
-                        p6426 + p6870 + regSalud + p6210 + cotPension + 
-                        p7040 + p7495 + p7505, data = data_clean)
+reg_multi_inter <- lm(logwage ~ age + age2 + female + female*age + 
+                        estrato1 + p6240 + p6426 + p6870 + regSalud + 
+                        p6210 + cotPension + p7040 + p7495 + p7505 + 
+                        relab, data = data_clean)
 stargazer(reg_multi_inter, type = 'text')
 
 reg_multi2 <- lm(l_impa ~ female + age + age2 + estrato1 + p6240 + 
                    p6426 + p6870 + regSalud + p6210 + cotPension + 
-                   p7040 + p7495 + p7505, data = data_clean)
+                   p7040 + p7495 + p7505 + relab, data = data_clean)
 stargazer(reg_multi2, type = 'text')
-
-reg_multi3 <- lm(l_ysalaryhu ~ female + age + age2 + estrato1 + p6240 + 
-                   p6426 + p6870 + regSalud + p6210 + cotPension + 
-                   p7040 + p7495 + p7505, data = data_clean)
-stargazer(reg_multi3, type = 'text')
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 3. Estimate the conditional wage gap using FWL ==============================
@@ -129,20 +101,32 @@ stargazer(reg_multi3, type = 'text')
 
 reg_y <- lm(logwage ~ age + age2 + estrato1 + p6240 + 
               p6426 + p6870 + regSalud + p6210 + cotPension + 
-              p7040 + p7495 + p7505, data = data_clean)
+              p7040 + p7495 + p7505 + relab, data = data_clean)
 resid_y <- resid(reg_y)
+
+reg_y_inter <- lm(logwage ~ age + age2 + female*age + 
+                    estrato1 + p6240 + p6426 + p6870 + regSalud + 
+                    p6210 + cotPension + p7040 + p7495 + p7505 + 
+                    relab, data = data_clean)
+resid_y_inter <- resid(reg_y_inter)
 
 # regress female on all control variables
 
 reg_x <- lm(female ~ age + age2 + estrato1 + p6240 + 
               p6426 + p6870 + regSalud + p6210 + cotPension + 
-              p7040 + p7495 + p7505, data = data_clean)
+              p7040 + p7495 + p7505 + relab, data = data_clean)
 resid_x <- resid(reg_x)
+
+reg_x_inter <- lm(female ~ age + age2 + female*age + estrato1 + p6240 + 
+              p6426 + p6870 + regSalud + p6210 + cotPension + 
+              p7040 + p7495 + p7505 + relab, data = data_clean)
+resid_x_inter <- resid(reg_x_inter)
 
 # regress the residuals
 
 reg_FWL <- lm(resid_y ~ resid_x)
-stargazer(reg_FWL, type = 'text')
+reg_FWL_inter <- lm(resid_y_inter ~ resid_x_inter)
+stargazer(reg_FWL, reg_FWL_inter, type = 'text')
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 4. Estimate the conditional wage gap using FWL with bootstrap ===============
@@ -170,6 +154,31 @@ set.seed(111)
 # use boot 
 
 bootstrap <- boot(data = data_clean, statistic = fn_fwl, R = 1000)
+
+
+coefs <- reg_multi_inter$coef
+b0<-coefs[1] 
+b1<-coefs[2]
+b2<-coefs[3] 
+b3<-coefs[4]
+b4<-coefs[5]
+age_bar <- mean(data_clean$age)
+wage_gap <- b3 + b4*age_bar
+
+fn_fwl_inter <- function(data, index, age_bar) {
+  reg <- lm(logwage ~ age + age2 + female + female*age + 
+              estrato1 + p6240 + p6426 + p6870 + regSalud + 
+              p6210 + cotPension + p7040 + p7495 + p7505 + 
+              relab, data = data_clean, subset = index)
+  b3 <- reg$coefficients[4]
+  b4 <- reg$coefficients[5]
+  wage_gap <- b3 + b4*age_bar
+  return(wage_gap)
+}
+
+fn_fwl_inter(data_clean, 1:nrow(data_clean))
+
+boot_results <- boot(data = data_clean, fn_fwl_inter, R = 1000)
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 5. Plot the predicted age-wage profile ======================================
