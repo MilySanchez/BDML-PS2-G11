@@ -84,15 +84,15 @@ testing <- data_clean %>%
 model_1 <- lm(logwage ~ age + age2, data = training)
 
 model_2 <- lm(logwage ~ female*age + female*age2 + estrato1 + p6240 + 
-                p6426 + p6870 + regSalud  + cotPension + 
+                p6426 + p6870 + cotPension + 
                 p7040 + p7495 + p7505, data = training)
 
 model_3 <- lm(logwage ~ female*age + female:age2 +female:poly(age,3,raw=T) + estrato1 + p6240 + 
-                p6426 + p6870 + regSalud  + cotPension + 
+                p6426 + p6870 + cotPension + 
                 p7040 + p7495 + p7505, data = training)
 
 model_4 <- lm(logwage ~ female:cotPension + female:p6870 + female + cotPension + 
-                p6870  + estrato1 + p6240 + p6426  + regSalud + 
+                p6870  + estrato1 + p6240 + p6426 + 
                  + cotPension + p7040 + p7495 + p7505 + age + age2, data = training)
 
 model_5 <- lm(logwage ~ age + age2 + poly(age,3,raw=T) + poly(age,4,raw=T) + 
@@ -106,7 +106,7 @@ training <- training %>% mutate(logP6426 = ifelse(p6426 == 0, 0, log(p6426)))
 testing <- testing %>% mutate(logP6426 = ifelse(p6426 == 0, 0, log(p6426)))
                 
 model_7 <- lm(logwage ~ age + age2 + p6426 + poly(p6426,2,raw=T) + logP6426+ 
-                p6870 + estrato1 + p6240 + p6426 + regSalud + abs(age-53)+
+                p6870 + estrato1 + p6240 + p6426 + abs(age-53)+
                 + cotPension + p7040 + p7495 + p7505, data = training)
 
 RMSE_values <- numeric(7)  
@@ -118,4 +118,26 @@ for (i in 1:7) {
   RMSE_values[i] <- caret::RMSE(pred, testing$logwage)
 }
 
+#modelos 2 y 4
+ctrl <- trainControl(
+  method="LOOCV"
+)
+
+model_2b <- train(
+  logwage ~ female*age + female*age2 + estrato1 + p6240 + 
+    p6426 + p6870 + cotPension + 
+    p7040 + p7495 + p7505,
+  data=data_clean,
+  method="lm",
+  trControl=ctrl
+)
+
+mode_4b <- train(
+  logwage ~ female:cotPension + female:p6870 + female + cotPension + 
+    p6870  + estrato1 + p6240 + p6426 + 
+    + cotPension + p7040 + p7495 + p7505 + age + age2,
+  data=data_clean,
+  method="lm",
+  trControl=ctrl
+) 
 
