@@ -45,10 +45,13 @@ stargazer(reg1,summary = F, out=file.path(dir$views,'reg1.txt'))
 ggplot(data_clean, aes(x = age, y = logwage)) +
   geom_point(alpha = 0.5) +  
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red", se = TRUE) +
-  labs(title = "Regresión de ingresos por edad",
-       x = "Age",
-       y = "log(W)") +
+  labs(
+       x = "Edad",
+       y = "log(Salario)") +
   theme_minimal()
+
+ggsave(file.path(dir$views, paste0("age_wage_regression", ".pdf")), 
+       width = 8, height = 6, dpi = 300)
 
 # PEAK AGE - MAX DERIVATES
 beta_1 <- coef(reg1)[2]
@@ -80,16 +83,17 @@ cat("Confidence intervals: (", ci_lower, ", ", ci_upper, ") years\n")
 
 # Create a new df with predict of to model to age
 data_clean$predicted_logwage <- predict(reg1, newdata = data_clean)
+PEAK_LOGWAGE <- data_clean$predicted_logwage[data_clean$age == round(PEAK_AGE)][1]
 
 # Plot wage-hour, peak age and confidence intervals
 ggplot(data_clean, aes(x = age, y = logwage)) +
-  geom_point(color = "red", alpha = 0.5) +  # Datos reales
-  geom_line(aes(y = predicted_logwage), color = "blue", size = 1) +  # Perfil estimado
-  geom_vline(xintercept = PEAK_AGE, color = "green", linetype = "dashed", size = 1) +  # Edad de pico
-  geom_vline(xintercept = ci_lower, color = "orange", linetype = "dashed", size = 1) +  # Límite inferior CI
-  geom_vline(xintercept = ci_upper, color = "orange", linetype = "dashed", size = 1) +  # Límite superior CI
-  labs(title = "Perfil estimado de ganancias por edad y edad de pico con CI Bootstrap",
-       x = "Edad",
+  geom_line(aes(y = predicted_logwage), color = "#00BFC4", size = 1) +  # Perfil estimado
+  geom_point(aes(x = PEAK_AGE, y = PEAK_LOGWAGE), color = "darkblue", size = 3) +  # Pico
+  geom_errorbarh(aes(y = PEAK_LOGWAGE, xmin = ci_lower, xmax = ci_upper), color = "darkblue", height = 0.05, linewidth = 1.5) +  # Intervalo de confianza
+  labs(x = "Edad",
        y = "Log(Salario)") +
+  lims(x = c(18, 100), y = c(9,11)) +
   theme_minimal()
 
+ggsave(file.path(dir$views, paste0("age_wage_profile", ".pdf")), 
+       width = 8, height = 6, dpi = 300)

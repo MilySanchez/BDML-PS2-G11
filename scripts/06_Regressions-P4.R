@@ -104,6 +104,8 @@ resid_x_inter <- resid(reg_x_inter)
 reg_FWL_inter <- lm(resid_y_inter ~ resid_x_inter)
 stargazer(reg_FWL_inter, type = 'latex')
 
+
+  
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 4. Estimate the conditional wage gap using FWL with bootstrap ===============
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -230,3 +232,33 @@ ci_men
 ci_women <- boot.ci(peaks_boot, index = 2, type = 'perc')
 ci_women
 
+# Create plot with pieks and confidence intervals
+
+ggplot() +
+  geom_line(data = df_plot, aes(x = age, y = logwage_predicted, color = gender), size = 1) +
+  
+  geom_errorbarh(aes(xmin = ci_men$percent[1, 4], xmax = ci_men$percent[1, 5], 
+                     y = df_plot$logwage_predicted[df_plot$age == round(peak_age_men) & df_plot$gender == "Men"]), color = "brown3",
+                 height = 0.05, linewidth = 1.5) +
+  geom_errorbarh(aes(xmin = ci_women$percent[1, 4], xmax = ci_women$percent[1, 5], 
+                     y = df_plot$logwage_predicted[df_plot$age == round(peak_age_women) & df_plot$gender == "Women"]), color = "darkblue",
+                 height = 0.05, linewidth = 1.5) +
+  
+  geom_point(aes(x = peak_age_men, 
+                 y = df_plot$logwage_predicted[df_plot$age == round(peak_age_men) & df_plot$gender == "Men"]), 
+             color = "brown3",
+             size = 3) +
+  geom_point(aes(x = peak_age_women, 
+                 y = df_plot$logwage_predicted[df_plot$age == round(peak_age_women) & df_plot$gender == "Women"]),
+             color = "darkblue",
+             size = 3) +
+  
+  
+  # Labels and theme
+  scale_color_discrete(labels = c("Hombre", "Mujer")) +
+  labs(x = 'Edad', y = 'Log(Salario)', color = "Género") +
+  lims(x = c(18,100), y = c(9,11)) +
+  theme_minimal()
+
+ggsave(file.path(dir$views, paste0("age_wage_profile_by_gender", ".pdf")), 
+       width = 8, height = 6, dpi = 300)
