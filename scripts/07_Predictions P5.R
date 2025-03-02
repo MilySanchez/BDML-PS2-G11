@@ -132,7 +132,7 @@ model_2b <- train(
   trControl=ctrl
 )
 
-mode_4b <- train(
+model_4b <- train(
   logwage ~ female:cotPension + female:p6870 + female + cotPension + 
     p6870  + estrato1 + p6240 + p6426 + 
     + cotPension + p7040 + p7495 + p7505 + age + age2,

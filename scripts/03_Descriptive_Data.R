@@ -40,8 +40,31 @@ db_geih <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 #get descriptive statistic table of all variables after cleaning
 skim_result <- skim(db_geih |>select(-c(dominio,...1,directorio,secuencia_p,orden)))
 
+skim_result <- skim_result |>
+  rename_with(~ gsub("numeric\\.", "", .x)) |>  # Renombrar columnas numéricas
+  rename(variable = skim_variable, c_rate = complete_rate, type = skim_type) |>  # Cambiar skim_variable por variable
+  arrange(variable)
+
+stargazer(as.data.frame(skim_result), summary=F, type="text",out = file.path(dir$views,'data_description_total.txt'))
+
+
+skim_result_summary <- skim(db_geih |>select(-c(dominio,...1,directorio,secuencia_p,orden)) |>
+  select(c(p6870,p6050,relab,estrato1,p6240,regSalud,cotPension,p6050,p6090,p7495,p7505,p7040, 
+           p7090,cuentaPropia,microEmpresa,sex,formal,age,totalHoursWorked,ingtot,mes,p7500s1a1,
+           p7500s2a1,p7500s3a1,p7510s1a1,p7510s2a1,p7510s3a1,p7510s5a1,p7510s6a1,p7510s7a1)))
+
+
+skim_result_summary <- skim_result_summary %>%
+  select(-skim_type, -n_missing, -complete_rate, -numeric.hist) %>%  # Eliminar columnas
+  rename_with(~ gsub("numeric\\.", "", .x)) %>%  # Renombrar columnas numéricas
+  rename(variable = skim_variable) %>%  # Cambiar skim_variable por variable
+  arrange(variable)
+
 #save the descriptive table in a txt file
-stargazer(as.data.frame(skim_result), summary=F, type="text",out = file.path(dir$views,'data_description.txt'))
+stargazer(as.data.frame(skim_result_summary), summary=F, type="text",out = file.path(dir$views,'data_description.txt'))
+
+stargazer(as.data.frame(skim_result_summary), summary=F, out = file.path(dir$views,'data_description.txt'))
+
 
 #create a new df containing just discrete data
 db_geih_discrete <- db_geih |> select(p6870, p6050, relab, estrato1, p6240, regSalud,
