@@ -51,14 +51,6 @@ colnames(data_clean)
 
 reg_simple1 <- lm(logwage ~ female, data = data_clean)
 
-data_clean <- data_clean %>%
-  filter(impa > 0) %>% 
-  mutate(impah = impa / (totalHoursWorked*4)) %>% 
-  mutate(l_impa = log(impah))
-
-reg_simple2 <- lm(l_impa ~ female, data = data_clean)
-stargazer(reg_simple1, reg_simple2, type = 'text')
-
 # regression between wage and gender, controlling by characteristics of workers
 
 data_clean <- data_clean %>% mutate(estrato1 = as.factor(estrato1),
@@ -79,16 +71,12 @@ data_clean <- data_clean %>% mutate(estrato1 = as.factor(estrato1),
 data_clean <- data_clean %>% mutate(relab = relevel(relab, ref = 8))
 data_clean <- data_clean %>% mutate(p6240 = relevel(p6240, ref = 2))
 
-reg_multi_inter <- lm(logwage ~ female + female:age + age + age2 + 
-                         estrato1 + p6240 + p6426 + p6870 + regSalud + 
+reg_multi_inter <- lm(logwage ~ female + female:age + female:age2 + age + 
+                         age2 + estrato1 + p6240 + p6426 + p6870 + regSalud + 
                          p6210 + cotPension + p7040 + p7495 + p7505, 
                        data = data_clean)
 
-reg_multi_inter2 <- lm(l_impa ~ female + female:age + age + age2 + 
-                         estrato1 + p6240 + p6426 + p6870 + regSalud + 
-                         p6210 + cotPension + p7040 + p7495 + p7505, 
-                       data = data_clean)
-stargazer(reg_multi_inter, reg_multi_inter2, type = 'text')
+stargazer(reg_multi_inter, type = 'text')
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 3. Estimate the conditional wage gap using FWL ==============================
@@ -96,7 +84,7 @@ stargazer(reg_multi_inter, reg_multi_inter2, type = 'text')
 
 # regress logwage on all control variables
 
-reg_y_inter <- lm(logwage ~ age + age2 + female:age + 
+reg_y_inter <- lm(logwage ~ age + age2 + female:age + female:age2 +
                     estrato1 + p6240 + p6426 + p6870 + regSalud + 
                     p6210 + cotPension + p7040 + p7495 + p7505, 
                   data = data_clean)
@@ -104,9 +92,9 @@ resid_y_inter <- resid(reg_y_inter)
 
 # regress female on all control variables
 
-reg_x_inter <- lm(female ~ age + age2 + female:age + estrato1 + p6240 + 
-              p6426 + p6870 + regSalud + p6210 + cotPension + 
-              p7040 + p7495 + p7505, data = data_clean)
+reg_x_inter <- lm(female ~ age + age2 + female:age + female:age2 +
+              estrato1 + p6240 + p6426 + p6870 + regSalud + p6210 + 
+                cotPension + p7040 + p7495 + p7505, data = data_clean)
 resid_x_inter <- resid(reg_x_inter)
 
 # regress the residuals
@@ -123,12 +111,12 @@ stargazer(reg_FWL_inter, type = 'text')
 age_mean = mean(data_clean$age)
 
 fn_fwl <- function(data, index, age) {
-  reg_y <- lm(logwage ~ age + age2 + female:age + estrato1 + p6240 + 
-                p6426 + p6870 + regSalud + p6210 + cotPension + 
+  reg_y <- lm(logwage ~ age + age2 + female:age + female:age2 + estrato1 + 
+                p6240 + p6426 + p6870 + regSalud + p6210 + cotPension + 
                 p7040 + p7495 + p7505, data = data[index, ])
   resid_y <- resid(reg_y)
-  reg_x <- lm(female ~ age + age2 + female:age + estrato1 + p6240 + 
-                p6426 + p6870 + regSalud + p6210 + cotPension + 
+  reg_x <- lm(female ~ age + age2 + female:age + female:age2 + estrato1 +
+                p6240 + p6426 + p6870 + regSalud + p6210 + cotPension + 
                 p7040 + p7495 + p7505, data = data[index, ])
   resid_x <- resid(reg_x)
   reg_fwl <- lm(resid_y ~ resid_x)
@@ -211,20 +199,22 @@ coefs <- coefficients(reg_multi_inter)
 
 # calculate the peak ages for each gender with the derivative of age=0
 
-peak_age_men <- -1*coefs['age'] / (2*coefs['age2'])
-peak_age_women <- -1*(coefs['age'] + coefs['female:age']) / 
-  (2*coefs['age2'])
+peak_age_men <- -coefs[3] / (2*coefs[4])
+peak_age_men
+
+peak_age_women <- -(coefs[3] + coefs[35]) / (2*(coefs[4] + coefs[36]))
+peak_age_women
 
 # Build confidence intervals using bootstrap
 
 fn_peaks <- function(data, index) {
-  reg_boot <- lm(logwage ~ age + age2 + female + female:age + estrato1 + 
-                   p6240 + p6426 + p6870 + regSalud + p6210 + cotPension + 
-                   p7040 + p7495 + p7505, data = data[index, ])
+  reg_boot <- lm(logwage ~ age + age2 + female + female:age + female:age2 +
+                   estrato1 + p6240 + p6426 + p6870 + regSalud + p6210 + 
+                   cotPension + p7040 + p7495 + p7505, data = data[index, ])
   coefs <- coefficients(reg_boot)
-  peak_age_men <- -1*coefs['age'] / (2*coefs['age2'])
-  peak_age_women <- -1*(coefs['age'] + coefs[35]) / 
-    (2*coefs['age2'])
+  peak_age_men <- -coefs['age'] / (2*coefs['age2'])
+  peak_age_women <- -(coefs['age'] + coefs[35]) / 
+    (2*(coefs['age2'] + coefs[36]))
   return(c(peak_age_men, peak_age_women))
 }
 
