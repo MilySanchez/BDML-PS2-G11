@@ -76,7 +76,9 @@ reg_multi_inter <- lm(logwage ~ female + female:age + female:age2 + age +
                          p6210 + cotPension + p7040 + p7495 + p7505, 
                        data = data_clean)
 
-stargazer(reg_multi_inter, type = 'text')
+stargazer(reg_simple1, reg_multi_inter, type = 'latex', 
+          title = 'Regression Results', align = T, 
+          keep = c('female'))
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 3. Estimate the conditional wage gap using FWL ==============================
@@ -100,7 +102,7 @@ resid_x_inter <- resid(reg_x_inter)
 # regress the residuals
 
 reg_FWL_inter <- lm(resid_y_inter ~ resid_x_inter)
-stargazer(reg_FWL_inter, type = 'text')
+stargazer(reg_FWL_inter, type = 'latex')
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 # 4. Estimate the conditional wage gap using FWL with bootstrap ===============
