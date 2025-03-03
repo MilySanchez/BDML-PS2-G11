@@ -1,13 +1,13 @@
 # Problem Set Template Repository for Big Data and Machine Learning for Applied Economics
 
-This is the template repository for the problem sets.
+Este repositorio estudia la relación del ingreso salarial por hora de la población colombiana, a través de técnicas de Big Data y Machine Learning implementadas a los datos obtenidos por el [DANE](https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral/empleo-y-desempleo/geih-historicos) “Medición de Pobreza Monetariay Desigualdad Report”.
 
-The repo should contain at least four folders:
+Este repositorio contiene los siguientes folders:
 
-- `document`: contains your final document in `pdf` format. Ideally, the document should pull figures and tables directly from the `views` folder. I've included a latex template I created for the Thesis Seminar. 
-- `scripts`: contains all your scripts
-- `stores`: contains all the data sets used. If files are "too big" for GitHub, include a document describing where people can access the data.
-- `views`: contains all figures and tables
+- `document`: contiene el documento en formato `pdf` con todo el análisis de los datos, su extración, limpieza e interpretación em torno al ingreso salarial de los individuos de la muestra.
+- `scripts`: contiene todos los scripts de los códigos para el desarrollo del problema, cada uno continúa con el progreso del script anterior con total independencia a la hora de ejecutarlo.
+- `stores`: contiene todos los datos usados. Se subdivide en `raw` y `processed`, en donde se encuentran los datos recién extraídos y procesados (con y sin limpieza) respectivamente.
+- `views`: contiene todas las gráficas y tablas creadas a través de los códigos para el análisis del problema. Se encuentran organizados por `P2_Data`, `P3_Age-wage-profile`, `P4_Gender-earnings-GAP` y `P5_Predicting-earnings`, según en qué parte del desarrollo del problema se hayan obtenido.
 
 
 
