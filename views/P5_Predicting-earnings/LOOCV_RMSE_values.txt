@@ -1,0 +1,30 @@
+
+LOOCV RMSE values for different model specifications
+======================================
+Statistic N Mean  St. Dev.  Min   Max 
+--------------------------------------
+intercept 1 1.000            1     1  
+RMSE      1 0.644          0.644 0.644
+Rsquared  1 0.454          0.454 0.454
+MAE       1 0.472          0.472 0.472
+--------------------------------------
+
+LOOCV RMSE values for different model specifications
+======================================
+Statistic N Mean  St. Dev.  Min   Max 
+--------------------------------------
+intercept 1 1.000            1     1  
+RMSE      1 0.643          0.643 0.643
+Rsquared  1 0.456          0.456 0.456
+MAE       1 0.472          0.472 0.472
+--------------------------------------
+
+LOOCV RMSE values for different model specifications
+======================================
+Statistic N Mean  St. Dev.  Min   Max 
+--------------------------------------
+intercept 1 1.000            1     1  
+RMSE      1 0.644          0.644 0.644
+Rsquared  1 0.455          0.455 0.455
+MAE       1 0.473          0.473 0.473
+--------------------------------------
