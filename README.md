@@ -1,4 +1,4 @@
-# Problem Set Template Repository for Big Data and Machine Learning for Applied Economics
+# Group 11 - Problem Set Repository for Big Data and Machine Learning for Applied Economics
 
 Este repositorio estudia la relación del ingreso salarial por hora de la población colombiana, a través de técnicas de Big Data y Machine Learning implementadas a los datos obtenidos por el [DANE](https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral/empleo-y-desempleo/geih-historicos) “Medición de Pobreza Monetariay Desigualdad Report”.
 
