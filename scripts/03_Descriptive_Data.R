@@ -34,44 +34,43 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # 1. Descriptive Data ===========================================================================
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
 
-#load data
+#Load data
 db_geih <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv')) %>% select(-c(...1))
 
-#get descriptive statistic table of all variables after cleaning
+#Get descriptive statistic table of all variables after cleaning
 skim_result <- skim(db_geih |>select(-c(dominio,directorio,secuencia_p,orden)))
 
+#Simplify the table
 skim_result <- skim_result |>
-  rename_with(~ gsub("numeric\\.", "", .x)) |>  # Renombrar columnas numéricas
-  rename(variable = skim_variable, c_rate = complete_rate, type = skim_type) |>  # Cambiar skim_variable por variable
+  rename_with(~ gsub("numeric\\.", "", .x)) |>
+  rename(variable = skim_variable, c_rate = complete_rate, type = skim_type) |>
   arrange(variable)
 
+#Save the table of annex
 stargazer(as.data.frame(skim_result), summary=F, type="text",out = file.path(dir$views,'data_description_total.txt'))
 
-
+#Get the summary table, the one that goes in the main document
 skim_result_summary <- skim(db_geih |>select(-c(dominio,directorio,secuencia_p,orden)) |>
   select(c(p6870,p6050,relab,estrato1,p6240,regSalud,cotPension,p6050,p6090,p7495,p7505,p7040, 
            p7090,cuentaPropia,microEmpresa,sex,formal,age,totalHoursWorked,ingtot,mes,p7500s1a1,
            p7500s2a1,p7500s3a1,p7510s1a1,p7510s2a1,p7510s3a1,p7510s5a1,p7510s6a1,p7510s7a1)))
 
-
-skim_result_summary <- skim_result_summary %>%
-  select(-skim_type, -n_missing, -complete_rate, -numeric.hist) %>%  # Eliminar columnas
-  rename_with(~ gsub("numeric\\.", "", .x)) %>%  # Renombrar columnas numéricas
-  rename(variable = skim_variable) %>%  # Cambiar skim_variable por variable
+#Simplify the main table
+skim_result_summary <- skim_result_summary |>
+  select(-skim_type, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_with(~ gsub("numeric\\.", "", .x)) |>
+  rename(variable = skim_variable) |>
   arrange(variable)
 
 #save the descriptive table in a txt file
 stargazer(as.data.frame(skim_result_summary), summary=F, type="text",out = file.path(dir$views,'data_description.txt'))
 
-stargazer(as.data.frame(skim_result_summary), summary=F, out = file.path(dir$views,'data_description.txt'))
-
-
-#create a new df containing just discrete data
+#Create a new df containing just discrete data
 db_geih_discrete <- db_geih |> select(p6870, p6050, relab, estrato1, p6240, regSalud,
                                       cotPension, p6050, p6090,p7495, p7505,p7040, 
                                       p7090, cuentaPropia, microEmpresa, sex, formal)
 
-#get percentages of every possible category for all discrete data
+#Get percentages of every possible category for all discrete data
 porcentajes <- list()
 
 for (col in names(db_geih_discrete)) {
@@ -80,7 +79,7 @@ for (col in names(db_geih_discrete)) {
   porcentajes[[col]] <- props
 }
 
-#extract just percentages and create a df
+#Extract just percentages and create a df
 tabla_porcentajes <- map_df(names(porcentajes), function(var) {
  
   prop_vector <- porcentajes[[var]]
@@ -92,7 +91,7 @@ tabla_porcentajes <- map_df(names(porcentajes), function(var) {
   )
 })
 
-#Next lines up to saving the result in a txt file, create a organized table with percentages 
+#Next lines until saving the result in a txt file, create a organized table with percentages 
 
 #All possible values for those discrete data take a minimum of 0 and a maximum of 9
 categorias <- 0:9
@@ -124,8 +123,6 @@ tabla_porcentajes[is.na(tabla_porcentajes)] <- ""
 #save the result table in a txt file
 stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, type="text", out=file.path(dir$views,'discrete_description.txt'))
 
-stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, out=file.path(dir$views,'discrete_description.txt'))
-
 
 #create a correlation graph for each variable
 corr_graph <- db_geih |>select(-c(dominio,directorio,secuencia_p,orden)) |>
@@ -135,7 +132,7 @@ corr_graph <- db_geih |>select(-c(dominio,directorio,secuencia_p,orden)) |>
 
 library(ggcorrplot)
 
-# Gráfico con convenciones y nombres de variables
+#Corr graph and variable names
 p <- ggcorrplot(corr_graph, 
                 type = "lower", 
                 lab = TRUE, 
@@ -146,11 +143,11 @@ p <- ggcorrplot(corr_graph,
                 show.diag = FALSE               
 )
 
-# Personalización de la leyenda
+#Label personalization
 p <- p + scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0,
                               limits = c(-1, 1), breaks = c(-1, 0, 1), labels = c("-1", "0", "1"))
 
-# Ajuste de las etiquetas para mayor legibilidad
+#Adjusting labels for better readability
 p <- p + theme(
   axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8),  
   axis.text.y = element_text(size = 8),
@@ -160,4 +157,3 @@ p <- p + theme(
 
 ggsave(filename =file.path(dir$views,'corr_graph.png'), plot = p, width = 10, height = 10, dpi = 300)
 
-db_geih |> select(ingtot_H)
