@@ -133,7 +133,30 @@ corr_graph <- db_geih |>
   cor(use = "pairwise") |>
   round(1)
 
-p <- ggcorrplot(corr_graph, type = "lower", lab = T, show.legend = F) 
+library(ggcorrplot)
+
+# Gráfico con convenciones y nombres de variables
+p <- ggcorrplot(corr_graph, 
+                type = "lower", 
+                lab = TRUE, 
+                lab_size = 3,              
+                colors = c("blue", "white", "red"),  
+                title = "Matriz de Correlaciones",   
+                ggtheme = theme_minimal(),         
+                show.diag = FALSE               
+)
+
+# Personalización de la leyenda
+p <- p + scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0,
+                              limits = c(-1, 1), breaks = c(-1, 0, 1), labels = c("-1", "0", "1"))
+
+# Ajuste de las etiquetas para mayor legibilidad
+p <- p + theme(
+  axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8),  
+  axis.text.y = element_text(size = 8),
+  plot.margin = margin(10, 10, 10, 10) # Ajustar márgenes para evitar solapamiento
+)
+
 ggsave(filename =file.path(dir$views,'corr_graph.png'), plot = p, width = 10, height = 10, dpi = 300)
 
 db_geih |> select(ingtot_H)
