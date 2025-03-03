@@ -35,10 +35,10 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
 
 #load data
-db_geih <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
+db_geih <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv')) %>% select(-c(...1))
 
 #get descriptive statistic table of all variables after cleaning
-skim_result <- skim(db_geih |>select(-c(dominio,...1,directorio,secuencia_p,orden)))
+skim_result <- skim(db_geih |>select(-c(dominio,directorio,secuencia_p,orden)))
 
 skim_result <- skim_result |>
   rename_with(~ gsub("numeric\\.", "", .x)) |>  # Renombrar columnas numéricas
@@ -48,7 +48,7 @@ skim_result <- skim_result |>
 stargazer(as.data.frame(skim_result), summary=F, type="text",out = file.path(dir$views,'data_description_total.txt'))
 
 
-skim_result_summary <- skim(db_geih |>select(-c(dominio,...1,directorio,secuencia_p,orden)) |>
+skim_result_summary <- skim(db_geih |>select(-c(dominio,directorio,secuencia_p,orden)) |>
   select(c(p6870,p6050,relab,estrato1,p6240,regSalud,cotPension,p6050,p6090,p7495,p7505,p7040, 
            p7090,cuentaPropia,microEmpresa,sex,formal,age,totalHoursWorked,ingtot,mes,p7500s1a1,
            p7500s2a1,p7500s3a1,p7510s1a1,p7510s2a1,p7510s3a1,p7510s5a1,p7510s6a1,p7510s7a1)))
@@ -128,10 +128,10 @@ stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, out=file.path(dir$v
 
 
 #create a correlation graph for each variable
-corr_graph <- db_geih |>
+corr_graph <- db_geih |>select(-c(dominio,directorio,secuencia_p,orden)) |>
   select_if(is.numeric) |> 
   cor(use = "pairwise") |>
-  round(1)
+  round(1) 
 
 library(ggcorrplot)
 
@@ -156,6 +156,7 @@ p <- p + theme(
   axis.text.y = element_text(size = 8),
   plot.margin = margin(10, 10, 10, 10) # Ajustar márgenes para evitar solapamiento
 )
+
 
 ggsave(filename =file.path(dir$views,'corr_graph.png'), plot = p, width = 10, height = 10, dpi = 300)
 
