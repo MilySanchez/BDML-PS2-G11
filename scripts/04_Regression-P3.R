@@ -35,7 +35,7 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # 02_load clean data GEIH DB
 data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 
-db_geih <- db_geih |> mutate(p7500s1_0 = ifelse(p7500s1a1==0,T,F),
+db_geih <- data_clean |> mutate(p7500s1_0 = ifelse(p7500s1a1==0,T,F),
                              p7500s2_0 = ifelse(p7500s2a1==0,T,F),
                              p7500s3_0 = ifelse(p7500s3a1==0,T,F),
                              p7510s1_0 = ifelse(p7510s1a1==0,T,F),
@@ -44,6 +44,9 @@ db_geih <- db_geih |> mutate(p7500s1_0 = ifelse(p7500s1a1==0,T,F),
                              p7510s5_0 = ifelse(p7510s5a1==0,T,F),
                              p7510s6_0 = ifelse(p7510s6a1==0,T,F),
                              p7510s7_0 = ifelse(p7510s7a1==0,T,F))
+
+stargazer(db_geih |> summarise(across(ends_with("_0"), summary)), type="text", summary=F, out = file.path(dir$views, "P3_Age-wage-profile", "T_F_variables.txt"))
+
 
 # REGRESSION
 reg1 <- lm(logwage~age+age2, data=data_clean)
