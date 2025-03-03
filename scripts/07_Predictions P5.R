@@ -74,6 +74,77 @@ training <- data_clean %>%
 testing <- data_clean %>%
   filter(!row_number() %in% inTrain)
 
+# Graph the distribution of the dependent variable in training and testing samples
+
+data_clean <- data_clean %>% mutate(partition = ifelse(row_number() %in% inTrain, "Entrenamiento", "Prueba"),
+                                    gender = ifelse(female == 1, "Mujer", "Hombre"))
+
+ggplot(data_clean) +
+  geom_density(aes(x = logwage), fill = "blue", alpha = 0.5) +
+  labs(
+    x = "Log(Salario)",
+    y = "Densidad"
+  ) +
+  facet_wrap(~partition) +
+  theme_minimal() +
+  theme(strip.text = element_text(size = 16, face = "bold"))+
+  geom_text(
+    data = data_clean %>%
+      group_by(partition) %>%
+      summarise(n = n()),
+    aes(x = Inf, y = Inf, label = paste("N =", n)),
+    hjust = 1.1, vjust = 5,
+    inherit.aes = FALSE
+  )
+
+ggsave(file.path(dir$views, paste0("logwage_distribution_train_test", ".pdf")), 
+       width = 8, height = 6, dpi = 300)
+
+
+# Graph the distribution of the independent variable in training and testing samples
+# Most used one, sex and age
+
+ggplot(data_clean) +
+  geom_density(aes(x = age), fill = "red", alpha = 0.5) +
+  labs(
+    x = "Edad",
+    y = "Densidad"
+  ) +
+  facet_wrap(~partition) +
+  theme_minimal() +
+  theme(strip.text = element_text(size = 16, face = "bold"))+
+  geom_text(
+    data = data_clean %>%
+      group_by(partition) %>%
+      summarise(n = n()),
+    aes(x = Inf, y = Inf, label = paste("N =", n)),
+    hjust = 1.1, vjust = 5,
+    inherit.aes = FALSE
+  )
+
+ggsave(file.path(dir$views, paste0("age_distribution_train_test", ".pdf")), 
+       width = 8, height = 6, dpi = 300)
+
+data_prop <- data_clean %>%
+  group_by(partition, gender) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(partition) %>%
+  mutate(prop = n / sum(n) * 100)  # Convertir a porcentaje
+
+ggplot(data_prop) +
+  geom_bar(aes(x = gender, y = prop, fill = gender), stat = "identity", alpha = 0.7) +
+  labs(
+    x = "Género",
+    y = "Porcentaje"
+  ) +
+  facet_wrap(~partition) +
+  theme_minimal() +
+  theme(strip.text = element_text(size = 16, face = "bold"), legend.position = "none") 
+
+ggsave(file.path(dir$views, paste0("sex_distribution_train_test", ".pdf")), 
+       width = 8, height = 6, dpi = 300)
+
+
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
 # 3. Compare the predictive performance of specifications =====================
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -126,7 +197,8 @@ for (i in 1:8) {
   RMSE_values[i] <- caret::RMSE(pred, testing$logwage)
 }
 
-RMSE_values
+stargazer(RMSE_values, type = "text", title = "RMSE values for different model specifications",
+          out = file.path(dir$views, "RMSE_values.txt"))
 
 # Compute the prediction errors in the test sample
 
@@ -135,7 +207,9 @@ best_residuals <- testing$logwage - best_pred
 
 # Examine its distribution
 
-hist(best_residuals, breaks = 30, main = 'Distribution of Prediction Errors')
+hist(best_residuals, breaks = 30, xlab = "Residuos", ylab = "Frecuencia", col = "lightblue", main = "")
+
+
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
 # 4. Calculate predictive error using LOOCV ===================================
@@ -177,3 +251,5 @@ model_5b <- train(
   metric = 'RMSE'
 ) 
 
+stargazer(model_3b$results, model_4b$results, model_5b$results, type = "text", title = "LOOCV RMSE values for different model specifications",
+          out = file.path(dir$views, "LOOCV_RMSE_values.txt"))
