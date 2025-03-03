@@ -38,14 +38,14 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 
 db_geih <- read.csv(file.path(dir$raw,'table_geih.csv'))
 
-# 03_Overview
-# Columns
-variable.names(db_geih)
-## print data
-head(db_geih)
-## summary db
-skim(db_geih) %>% head()
-
+  # 03_Overview
+  # Columns
+  variable.names(db_geih)
+  ## print data
+  head(db_geih)
+  ## summary db
+  skim(db_geih) %>% head()
+  
 
 # 04_DATA CLEANING
 # FILTER (>= 18 YEAR AND LABOR POPULATION) 16.542
@@ -57,7 +57,7 @@ skim_result <- skim(db_geih)
 filter_columns <- skim_result[skim_result$complete_rate >= 0.7, ] %>% select(skim_variable) %>% pull()
 
 
-# COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (42 variables)
+# COLUMNS FILTER, COMPLETENESS OF DATA 70% OR ECONOMIC IMPORTANCE 70% (67 variables)
 db_geih <- db_geih %>% select(all_of(filter_columns))
 
 # TRANSFORMATION TO FACTOR CATAGORICAL VARIABLES AND WAGE BY HOUR
@@ -87,6 +87,8 @@ db_geih <- db_geih %>% mutate(sex=as.factor(sex),
 
 # REMOVE DUPLICATE COLUMNS
 db_geih <- db_geih %>% select(-c(p6100,pet,dsi,inac,p6920,pea,informal,p7070,maxEducLevel,sizeFirm))
+
+
 
 # FILTER WAGE > 0
 db_geih <- db_geih %>% filter(ingtot>0)
