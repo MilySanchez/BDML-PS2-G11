@@ -47,7 +47,7 @@ skim_result <- skim_result |>
   arrange(variable)
 
 #Save the table of annex
-stargazer(as.data.frame(skim_result), summary=F, type="text",out = file.path(dir$views,'data_description_total.txt'))
+stargazer(as.data.frame(skim_result), summary=F, type="text",out = file.path(dir$views, "P2_Data",'data_description_total.txt'))
 
 #Get the summary table, the one that goes in the main document
 skim_result_summary <- skim(db_geih |>select(-c(dominio,directorio,secuencia_p,orden)) |>
@@ -121,7 +121,7 @@ tabla_porcentajes <- cbind(valor = categorias, tabla_porcentajes)
 tabla_porcentajes[is.na(tabla_porcentajes)] <- ""
 
 #save the result table in a txt file
-stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, type="text", out=file.path(dir$views,'discrete_description.txt'))
+stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, type="text", out=file.path(dir$views, "P2_Data",'discrete_description.txt'))
 
 
 #create a correlation graph for each variable
