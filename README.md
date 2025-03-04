@@ -53,4 +53,4 @@ Para ejecutar los scripts, simplemente sigue el siguiente orden:
 
 ---
 
-Este repositorio es una herramienta útil para estudiar la relación entre los ingresos salariales y las variables demográficas en Colombia utilizando técnicas de **Big Data** y **Machine Learning**. Esperamos que los resultados de este análisis puedan contribuir a una mejor comprensión de la economía laboral colombiana.
+Este es un trabajo elaborado para la materia de Big Data y Machine Learning para economía de la Universidad de los Andes, semestre 2025-1.
