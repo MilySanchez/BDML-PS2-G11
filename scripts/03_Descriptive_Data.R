@@ -131,6 +131,8 @@ tabla_porcentajes_2 = tabla_porcentajes |> select(valor, p7495, p7505, p7040, p7
 stargazer(as.data.frame(tabla_porcentajes_1), summary = FALSE, type="text", out=file.path(dir$views, "P2_Data",'discrete_description_1.txt'))
 stargazer(as.data.frame(tabla_porcentajes_2), summary = FALSE, type="text", out=file.path(dir$views, "P2_Data",'discrete_description_2.txt'))
 
+#What is the most repeated job?
+print(db_geih |> count(oficio, sort = T) |> slice_max(n, n=1))
 
 #create a correlation graph for each variable
 corr_graph <- db_geih |>select(-c(dominio,directorio,secuencia_p,orden)) |>
