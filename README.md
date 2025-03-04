@@ -1,7 +1,6 @@
 # Repositorio de Conjunto de Problemas - Grupo 11: Big Data y Machine Learning para la Economía Aplicada
 
-Este repositorio tiene como objetivo analizar la relación del ingreso salarial por hora de la población colombiana, utilizando técnicas de **Big Data** y **Machine Learning** aplicadas a los datos obtenidos del **[DANE](https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral/empleo-y-desempleo/geih-historicos)** a través del informe de "Medición de Pobreza Monetaria y Desigualdad".
-
+Este repositorio tiene como objetivo analizar la relación del ingreso salarial por hora de la población colombiana, utilizando técnicas de **Big Data** y **Machine Learning** aplicadas a los datos obtenidos previamente por el profesor [Manuel Fernández Sierra](https://sites.google.com/view/manuelfernandezsierra) y alojados en la pagina del profesor [Ignacio Sarmiento](https://ignaciomsarmiento.github.io/GEIH2018_sample/) con base a la Gran Encuesta Integrada de Hogares (GEIH) del  **[DANE](https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral/empleo-y-desempleo/geih-historicos)**.
 ## Estructura del Repositorio
 
 Este repositorio está dividido en varias carpetas que organizan el contenido de manera eficiente:
@@ -12,7 +11,7 @@ Contiene el archivo en formato `.pdf` del informe final presentado sobre el aná
 ### 2. `stores`
 Esta carpeta contiene todos los datos utilizados en el proyecto. Está subdividida en las siguientes secciones:
 - **`raw`**: Contiene los datos recién extraídos sin procesar.
-- **`processed`**: Contiene los datos procesados, tanto con limpieza como sin limpieza.
+- **`processed`**: Contiene los datos procesados, quedando con 60 variables en total.
 
 ### 3. `views`
 Aquí se encuentran todas las gráficas y tablas creadas durante el análisis del problema. Estas están organizadas de acuerdo a las diferentes etapas del desarrollo del problema:
