@@ -44,6 +44,7 @@ skim_result <- skim(db_geih |>select(-c(dominio,directorio,secuencia_p,orden)))
 skim_result <- skim_result |>
   rename_with(~ gsub("numeric\\.", "", .x)) |>
   rename(variable = skim_variable, c_rate = complete_rate, type = skim_type) |>
+  mutate(across(where(is.numeric), ~ format(.x, scientific = TRUE))) |>
   arrange(variable)
 
 #Save the table of annex
@@ -120,8 +121,15 @@ tabla_porcentajes <- cbind(valor = categorias, tabla_porcentajes)
 #Replace NA for a blank space
 tabla_porcentajes[is.na(tabla_porcentajes)] <- ""
 
-#save the result table in a txt file
-stargazer(as.data.frame(tabla_porcentajes), summary = FALSE, type="text", out=file.path(dir$views, "P2_Data",'discrete_description.txt'))
+#Divide the table into 2 different ones to organize it better
+tabla_porcentajes_1 = tabla_porcentajes |> select(valor, p6870, p6050, relab, estrato1, p6240, regSalud, cotPension, p6090)
+
+tabla_porcentajes_2 = tabla_porcentajes |> select(valor, p7495, p7505, p7040, p7090, cuentaPropia, microEmpresa, sex, formal) |>
+  filter(valor <=2)
+
+#save the result tables in a txt file
+stargazer(as.data.frame(tabla_porcentajes_1), summary = FALSE, type="text", out=file.path(dir$views, "P2_Data",'discrete_description_1.txt'))
+stargazer(as.data.frame(tabla_porcentajes_2), summary = FALSE, type="text", out=file.path(dir$views, "P2_Data",'discrete_description_2.txt'))
 
 
 #create a correlation graph for each variable
@@ -151,7 +159,7 @@ p <- p + scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoin
 p <- p + theme(
   axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8),  
   axis.text.y = element_text(size = 8),
-  plot.margin = margin(10, 10, 10, 10) # Ajustar márgenes para evitar solapamiento
+  plot.margin = margin(10, 10, 10, 10)
 )
 
 
