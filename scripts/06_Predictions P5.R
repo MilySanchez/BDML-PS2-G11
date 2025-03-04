@@ -1,7 +1,10 @@
 ##########################################################
 # Title: Exercise Number 5 predicting earnings
-# Description: This script ...
-#
+# Description: This script performs data analysis and model comparison 
+#              for predicting earnings (logwage) based on various demographic 
+#              and employment-related features. It covers data preprocessing, 
+#              model fitting, evaluation, and cross-validation to identify 
+#              the best model for predicting wages.
 # Date: 26/02/2025
 ##########################################################
 
