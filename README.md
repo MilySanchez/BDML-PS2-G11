@@ -22,7 +22,7 @@ Aquí se encuentran todas las gráficas y tablas creadas durante el análisis de
 - **`P5_Predicting-earnings`**: Predicción de ingresos.
 
 ### 4. `scripts`
-Esta carpeta contiene todos los scripts de código utilizados para el desarrollo del análisis. Cada script se ejecuta de manera independiente pero sigue el progreso del script anterior. En total, hay **8 scripts** organizados de la siguiente manera:
+Esta carpeta contiene todos los scripts de código utilizados para el desarrollo del análisis. Cada script se ejecuta de manera independiente pero sigue el progreso del script anterior. En total, hay **7 scripts** organizados de la siguiente manera:
 
 1. **00_load_requierments.R**  
    **Función**: Carga las librerías necesarias para el funcionamiento de todos los códigos. Este script debe ejecutarse al inicio de cada uno de los siguientes scripts.
