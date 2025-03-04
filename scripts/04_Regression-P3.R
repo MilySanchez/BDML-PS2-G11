@@ -35,9 +35,6 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # 02_load clean data GEIH DB
 data_clean <- read.csv(file.path(dir$processed,'data_cleanGEIH.csv'))
 
-#The following table was create to show how much people do not have external incomes
-
-#Create new variables with T if they do not receive external incomes and F if they do
 df <- data_clean |> mutate(p7500s1_0 = ifelse(p7500s1a1==0,T,F),
                              p7500s2_0 = ifelse(p7500s2a1==0,T,F),
                              p7500s3_0 = ifelse(p7500s3a1==0,T,F),
@@ -47,28 +44,22 @@ df <- data_clean |> mutate(p7500s1_0 = ifelse(p7500s1a1==0,T,F),
                              p7510s5_0 = ifelse(p7510s5a1==0,T,F),
                              p7510s6_0 = ifelse(p7510s6a1==0,T,F),
                              p7510s7_0 = ifelse(p7510s7a1==0,T,F))
-
-#Rename the variables to expose them better in the final table
 df <- df |> select(p7500s1_0, p7500s2_0, p7500s3_0, p7510s1_0, p7510s2_0, 
                    p7510s3_0, p7510s5_0, p7510s6_0, p7510s7_0) |>
   rename(p7500s1 = p7510s7_0, p7500s2 = p7500s2_0, p7500s3 = p7500s3_0, p7510s1 = p7510s1_0,
          p7510s2 = p7510s2_0, p7510s3 = p7510s3_0, p7510s5 = p7510s5_0, p7510s6 = p7510s6_0,
          p7510s7 = p7510s7_0)
 
-#Get probabilities
 df_probs <- df |> summarise(across(starts_with("p"), mean, na.rm = TRUE))
 
-#Save the table
 stargazer(df_probs, type="text", summary=F, out = file.path(dir$views, "P3_Age-wage-profile", "T_F_variables.txt"))
 
 
 # REGRESSION
 reg1 <- lm(logwage~age+age2, data=data_clean)
 
-#Save the table
 stargazer(reg1,summary = F, out=file.path(dir$views,'reg1.txt'))
 
-#Plot the regression
 ggplot(data_clean, aes(x = age, y = logwage)) +
   geom_point(alpha = 0.5) +  
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red", se = TRUE) +
@@ -77,7 +68,6 @@ ggplot(data_clean, aes(x = age, y = logwage)) +
        y = "log(Salario)") +
   theme_minimal()
 
-#Save the graph of the regression
 ggsave(file.path(dir$views, paste0("age_wage_regression", ".pdf")), 
        width = 8, height = 6, dpi = 300)
 
@@ -88,7 +78,7 @@ PEAK_AGE <- -beta_1 / (2 * beta_2) # 53 YEARS
 
 # Function to estimates peak age in a boostrap model
 PEAK_AGE_bootstrap <- function(data, indicator) {
-  data_resampled <- data[indicator, ]
+  data_resampled <- data[indicator, ]  # Muestra con reemplazo
   reg_resampled <- lm(logwage ~ age + age2, data = data_resampled)
   beta_1_resampled <- coef(reg_resampled)[2]
   beta_2_resampled <- coef(reg_resampled)[3]
@@ -123,6 +113,5 @@ ggplot(data_clean, aes(x = age, y = logwage)) +
   lims(x = c(18, 100), y = c(9,11)) +
   theme_minimal()
 
-#Save the graph of the profile
 ggsave(file.path(dir$views, paste0("age_wage_profile", ".pdf")), 
        width = 8, height = 6, dpi = 300)

@@ -64,7 +64,7 @@ skim_result_summary <- skim_result_summary |>
   arrange(variable)
 
 #save the descriptive table in a txt file
-stargazer(as.data.frame(skim_result_summary), summary=F, type="text",out = file.path(dir$views,'data_description.txt'))
+stargazer(as.data.frame(skim_result_summary), summary=F, type="text",out = file.path(dir$views,"P2_Data",'data_description.txt'))
 
 #Create a new df containing just discrete data
 db_geih_discrete <- db_geih |> select(p6870, p6050, relab, estrato1, p6240, regSalud,
@@ -163,5 +163,5 @@ p <- p + theme(
 )
 
 #Save the image
-ggsave(filename =file.path(dir$views,'corr_graph.png'), plot = p, width = 10, height = 10, dpi = 300)
+ggsave(filename =file.path(dir$views, "P2_Data",'corr_graph.png'), plot = p, width = 10, height = 10, dpi = 300)
 
