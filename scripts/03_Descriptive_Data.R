@@ -162,6 +162,6 @@ p <- p + theme(
   plot.margin = margin(10, 10, 10, 10)
 )
 
-
+#Save the image
 ggsave(filename =file.path(dir$views,'corr_graph.png'), plot = p, width = 10, height = 10, dpi = 300)
 
