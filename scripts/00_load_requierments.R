@@ -4,7 +4,7 @@
 # and loaded into the environment. If a package is not installed, it will be
 # automatically downloaded and installed.
 #
-# Date: 09/02/2025
+# Date: 20/03/2025
 ##########################################################
 
 
@@ -23,7 +23,8 @@ install_and_load <- function(packages) {
 
 required_packages <- c("tidyverse", "data.table", "ggplot2", "dplyr","ggcorrplot",
                        "readr", "lubridate", "stringr", "rvest", "rio", "skimr",
-                       "visdat","stargazer","purrr", "caret", "boot")
+                       "visdat","stargazer","purrr", "caret", "boot", "glmnet",
+                      "Mlmetrics", "Metrics")
 
 # Install and load all required packages
 install_and_load(required_packages)
