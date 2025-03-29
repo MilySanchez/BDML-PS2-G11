@@ -282,3 +282,6 @@ rsconnect/
 .Rproj.user
 .Rdata
 .quarto
+
+# Exclude views/Models directory the files exced 100 mb 
+views/Models/
