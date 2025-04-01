@@ -1,9 +1,9 @@
 ##########################################################
-# Title: Data cleaning and processing
+# Title: Data processing and exploratory analysis
 # Description: This script aims to clean and process the raw
 # data. This includes treating missing values, transforming
 # existing variables, and creating new relevant variables.
-# Date: 18/03/2025
+# Date: 30/03/2025
 ##########################################################
 
 # =========================================================
@@ -32,9 +32,9 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 
 ### library(pacman)
 ### p_load("tidyverse", "data.table", "ggplot2", "dplyr","ggcorrplot",
-       "readr", "lubridate", "stringr", "rvest", "rio", "skimr",
-       "visdat","stargazer","purrr", "caret", "boot", "glmnet",
-       "Mlmetrics", "Metrics")
+       # "readr", "lubridate", "stringr", "rvest", "rio", "skimr",
+       # "visdat","stargazer","purrr", "caret", "boot", "glmnet",
+       # "Mlmetrics", "Metrics")
 
 # Load inputs
 
@@ -98,70 +98,6 @@ train_personas <- train_personas %>%
     desocupado = Des,
     inactivo = Ina)
 
-# Select relevant variables personas
-
-train_personas <- train_personas %>% 
-  select(id,
-         Orden,
-         Clase,
-         Dominio,
-         sexo,
-         edad,
-         parentesco_jefe,
-         afiliado_salud,
-         seg_social_salud,
-         educacion,
-         grado_escolar,
-         actividad1,
-         meses_trabajando,
-         posicion_act1,
-         horas_extras,
-         primas,
-         bonificaciones,
-         auxilio_alimentacion,
-         auxilio_transporte,
-         subsidio_familiar,
-         subsidio_educativo,
-         pago_alimentos,
-         pago_vivienda,
-         transporte_empresa,
-         ingresos_especie,
-         prima_servicios12,
-         prima_navidad12,
-         prima_vacaciones12,
-         viaticos12,
-         bonificaciones_anuales12,
-         horas_sem,
-         personas_trabajo,
-         cotiza_pension,
-         otro_trabajo,
-         horas_actividad2,
-         posicion_act2,
-         trabajar_mas,
-         trabajar_mas4,
-         disp_trabajar_mas,
-         cambiar_trabajo4,
-         trabajo_1vez,
-         desocup_posicion,
-         desocup_ing,
-         ing_adicional,
-         pension_vejez,
-         pension_alimenticia,
-         ing_otros,
-         dinero_hogares_residentes,
-         dinero_hogares_fuera,
-         dinero_instituciones,
-         dinero_intereses,
-         dinero_cesantias,
-         dinero_otros,
-         ocupado,
-         desocupado,
-         inactivo,
-         Pet,
-         Fex_c,
-         Depto,
-         Fex_dpto)
-
 # Rename columns hogares
 
 train_hogares <- train_hogares %>%  
@@ -175,6 +111,30 @@ train_hogares <- train_hogares %>%
          npersonas_ug = Npersug,
          lindigencia = Li,
          lpobreza = Lp)
+
+# Exploratory data analysis hogares
+
+train_hogares_num <- train_hogares %>%
+  select(as.factor('Pobre'),
+         cuartos,
+         #camortizacion,
+         cuartosdormir,
+         arriendo_est,
+         #arriendo_efec,
+         npersonas,
+         npersonas_ug)
+cor_matrix <- cor(train_hogares_num, use = 'complete.obs')
+cor_pobre <- cor_matrix['Pobre', ]
+cor_pobre
+# pobre = 1 con menor cantidad de cuartos y mayor num de personas en hogar
+
+prop.table(table(train_hogares$tenencia_vivienda, train_hogares$Pobre), 
+           margin = 2)
+ggplot(train_hogares, aes(x = factor(tenencia_vivienda), 
+                          fill = factor(Pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Categorías 5 y 6 mayor % de hogares pobres (posesión sin título u otra)
 
 # Select relevant variables hogares
 
@@ -212,28 +172,191 @@ train_hogares <- upSample(x = train_hogares %>%
                           yname="Pobre")
 
 id_hogares_pobres = train_hogares %>% 
-  filter(Pobre==1) %>% 
+  filter(Pobre== 'Yes') %>% 
   select(id)
-
-personas_pobres = train_personas %>% 
-  filter(id %in% id_hogares_pobres$id)
 
 train_personas <- train_personas %>% 
   mutate(mujer = ifelse(sexo == 2,1,0),
          jefe_h = ifelse(parentesco_jefe == 1, 1, 0),
          EducLevel = ifelse(educacion == 9,0, educacion),
          ocupado = ifelse(is.na(ocupado),0,1),
-         cotiza_pension = ifelse(is.na(cotiza_pension),0,
-                                 ifelse(cotiza_pension==1,1,0)),
-         prima_servicios12 = ifelse(is.na(prima_servicios12),0,
-                                    ifelse(prima_servicios12==1,1,0))) %>% 
+         pobre = ifelse(id %in% id_hogares_pobres$id, 1, 0))
+
+# Exploratory data analysis personas
+
+train_personas_num <- train_personas %>%
+  select(as.factor('pobre'),
+         edad,
+         meses_trabajando,
+         horas_sem,
+         personas_trabajo,
+         horas_actividad2)
+cor_matrix_p <- cor(train_personas_num, use = 'complete.obs')
+cor_pobre_p <- cor_matrix_p['pobre', ]
+cor_pobre_p
+# num de personas/empleados en el trabajo tiene corr negativa con pobre = 1
+
+prop.table(table(train_personas$Clase, train_personas$pobre), 
+           margin = 2)
+ggplot(train_personas, aes(x = factor(Clase), 
+                          fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres en Clase=2 (no cabeceras)
+
+ggplot(train_personas, aes(x = factor(afiliado_salud), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando afiliado_salud=2,9 (no o no sabe)
+
+ggplot(train_personas, aes(x = factor(seg_social_salud), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando segsocial_salud=3,9 (subsidiado o no sabe)
+
+ggplot(train_personas, aes(x = factor(educacion), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando educ!=5,6 (media y superior)
+
+ggplot(train_personas, aes(x = factor(actividad1), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando act1=2 (buscando trabajo)
+
+ggplot(train_personas, aes(x = factor(posicion_act1), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando posicionact1= 6,7 (trabajadores sin remuneración)
+
+ggplot(train_personas, aes(x = factor(pago_alimentos), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando reciben alimentos como parte de pago
+
+ggplot(train_personas, aes(x = factor(prima_servicios12), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando no recibieron prima de servicios
+
+ggplot(train_personas, aes(x = factor(cotiza_pension), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando cotizapension = 2 (no cotiza)
+
+ggplot(train_personas, aes(x = factor(posicion_act2), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando posicionact2 = 8,9 (jornalero/peón u otro)
+
+ggplot(train_personas, aes(x = factor(desocup_posicion), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando desocposicion = 3,4,6,8 
+# (empleado doméstico, trabajador cuenta propia, trabajador sin remuneración, jornalero)
+
+ggplot(train_personas, aes(x = factor(desocup_ing), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando desocup_ing=2 (no recibio ingresos por trabajo)
+
+ggplot(train_personas, aes(x = factor(ing_adicional), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando ingadicional=2
+# (no recibio ingresos por arriendos o pensiones)
+
+ggplot(train_personas, aes(x = factor(pension_alimenticia), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando pensionaliment=1
+# (recibio pagos por pension aliment por paternidad, divorcio, separación)
+
+ggplot(train_personas, aes(x = factor(dinero_hogares_fuera), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando dinhogfuera=2 (no recibio dinero de fuera)
+
+ggplot(train_personas, aes(x = factor(dinero_instituciones), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando dininstitu=1 (si recibio ayudas de insti..)
+
+ggplot(train_personas, aes(x = factor(dinero_intereses), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando dinintere=2 (no recibio dinero por intereses)
+
+ggplot(train_personas, aes(x = factor(dinero_cesantias), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando dinces=2 (no recibio dinero por cesantías)
+
+ggplot(train_personas, aes(x = factor(dinero_otros), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando dinotros=2,9 (no recibio o no sabe/informa)
+
+ggplot(train_personas, aes(x = factor(ocupado), 
+                           fill = factor(pobre))) +
+  geom_bar(position = 'fill') +
+  theme_minimal()
+# Mayor % de personas pobres cuando ocupado=0
+
+
+# Select relevant variables personas
+
+train_personas <- train_personas %>% 
   select(id,
          Orden,
-         mujer,
-         jefe_h,
-         EducLevel,
-         ocupado)
+         Clase,
+         Dominio,
+         sexo,
+         edad,
+         afiliado_salud,
+         seg_social_salud,
+         educacion,
+         actividad1,
+         meses_trabajando,
+         posicion_act1,
+         pago_alimentos,
+         prima_servicios12,
+         horas_sem,
+         personas_trabajo,
+         cotiza_pension,
+         posicion_act2,
+         desocup_posicion,
+         desocup_ing,
+         ing_adicional,
+         pension_alimenticia,
+         dinero_hogares_fuera,
+         dinero_instituciones,
+         dinero_intereses,
+         dinero_cesantias,
+         dinero_otros,
+         ocupado,
+         Depto)
 
+
+##-----------------------------------------------------------------------------
 train_personas_nivel_hogar <- train_personas %>%
   group_by(id) %>% 
   summarize (nocupado=sum(ocupado, na.rm=T),
@@ -243,6 +366,7 @@ train_personas_hogar <- train_personas %>% filter(jefe_h==1) %>%
   select(id, mujer, EducLevel, ocupado) %>%
   rename(jefe_hmujer=mujer, jefe_hedu=EducLevel, jefe_hocupado = ocupado) %>% 
   left_join(train_personas_nivel_hogar)
+
 
 #TEST
 
