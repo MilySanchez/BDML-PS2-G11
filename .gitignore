@@ -285,4 +285,5 @@ rsconnect/
 
 # Exclude views/Models directory the files exced 100 mb 
 views/Models/
-store/models/train_personas.csv
+store/models/
+store/train_personas.csv
