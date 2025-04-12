@@ -1,5 +1,5 @@
 ##########################################################
-# Title: Data processing and exploratory analysis
+# Title: Data processing and cleaning
 # Description: This script aims to clean and process the raw
 # data. This includes treating missing values, transforming
 # existing variables, and creating new relevant variables.
@@ -17,29 +17,21 @@ rm(list = ls())
 # Set up paths
 
 dir <- list ()
-dir$root <- getwd()
-dir$processed <- file.path(dir$root, "stores", "processed")
-dir$raw <- file.path(dir$root, "stores", "raw")
+dir$root <- setwd(r'(C:\Users\Juanita.Rojas\BDML-PS2-G11)')
+dir$processed <- file.path(dir$root, "store", "processed")
+dir$raw <- file.path(dir$root, "store", "raw")
 dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
 setwd(dir$root)
-
-### setwd("C:/Users/Juanita.Rojas/OneDrive - insidemedia.net/Documentos")
 
 # Load required libraries
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
-### library(pacman)
-### p_load("tidyverse", "data.table", "ggplot2", "dplyr","ggcorrplot",
-       # "readr", "lubridate", "stringr", "rvest", "rio", "skimr",
-       # "visdat","stargazer","purrr", "caret", "boot", "glmnet",
-       # "Mlmetrics", "Metrics")
-
 # Load inputs
 
-train_hogares <- read.csv('train_hogares.csv')
-train_personas <- read.csv('train_personas.csv')
+train_hogares <- read.csv(file.path(dir$raw, "train_hogares.csv"))
+train_personas<-read.csv(file.path(dir$raw, "train_personas.csv"))
 
 # Rename columns personas
 
