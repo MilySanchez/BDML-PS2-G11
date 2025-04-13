@@ -17,7 +17,7 @@ rm(list = ls())
 # Set up paths
 
 dir <- list ()
-dir$root <- setwd(r'(C:\Users\Juanita.Rojas\BDML-PS2-G11)')
+dir$root <- getwd()
 dir$processed <- file.path(dir$root, "store", "processed")
 dir$raw <- file.path(dir$root, "store", "raw")
 dir$views <- file.path(dir$root, "views")
