@@ -17,7 +17,7 @@ rm(list = ls())
 # Set up paths
 
 dir <- list ()
-dir$root <- getwd()
+dir$root <- setwd(r'(C:\Users\Juanita.Rojas\BDML-PS2-G11)')
 dir$processed <- file.path(dir$root, "store", "processed")
 dir$raw <- file.path(dir$root, "store", "raw")
 dir$views <- file.path(dir$root, "views")
@@ -509,3 +509,13 @@ test_personas_hogar <- test_personas %>%
          H_Head_IngCes = IngCes, H_Head_IngOtros = IngOtros,
          H_Head_Ocupado = Ocupado) %>%  
   left_join(test_personas_nivel_hogar)
+
+# Create data frames for the model
+
+train <- train_hogares %>%  left_join(train_personas_hogar)
+test <- test_hogares %>% left_join(test_personas_hogar)
+
+# Export and save clean data of train and test
+
+write.csv(train, file.path(dir$processed, paste0("train", ".csv")), row.names = F)
+write.csv(test, file.path(dir$processed, paste0("test", ".csv")), row.names = F)
