@@ -67,44 +67,37 @@ train <- train %>%
 
 skimtrain <- skim(train)
 
-# Descriptive statistics for numeric variables
-
-train %>%
-  select(where(is.numeric)) %>%
-  summarise(across(everything(), list(
-    media = mean,
-    sd = sd,
-    min = min,
-    max = max,
-    q25 = ~quantile(., 0.25),
-    q75 = ~quantile(., 0.75),
-    skewness = ~e1071::skewness(.)),
-    na.rm = TRUE))
-
 # Descriptive statistics for categorical variables
 
 table(train$Pobre)
-prop.table(table(train$Pobre))*100
+prop_pobre <- prop.table(table(train$Pobre))*100
+df_pobre <- data.frame(Pobre = names(prop_pobre),
+                       Porcentaje = as.numeric(prop_pobre))
+
+pobre_plot <- ggplot(df_pobre, aes(x = Pobre, y = Porcentaje, fill = Pobre)) +
+  geom_col(width = 0.6, alpha = 0.8) +
+  scale_fill_manual(values = c('No' = '#3498db', 'Yes' = '#e74c3c')) +
+  labs(title = 'Distribución de hogares por condición de pobreza',
+       x = 'Condición de pobreza',
+       y = 'Porcentaje (%)',
+       caption = paste('Total de hogares:', nrow(train))) +
+  geom_text(aes(label = sprintf('%.1f%%', Porcentaje)),
+            vjust = -0.5, size = 4, fontface = 'bold') +
+  theme_minimal() + 
+  theme(legend.position = 'none',
+        plot.title = element_text(face = 'bold', hjust = 0.5),
+        axis.text = element_text(size = 10),
+        panel.grid.major.x = element_blank())
+
+ggsave(filename = file.path(dir$views, 'distribucion_pobreza.png'),
+       plot = pobre_plot,
+       width = 7,
+       height = 5,
+       dpi = 300)
 
 train %>% 
   select(where(is.factor)) %>% 
   summary()
-
-# Distribution of Pobre
-
-ggplot(train, aes(x = factor(Pobre))) +
-  geom_bar(fill = c('blue', 'red')) +
-  labs(title = 'Distribución de hogares pobres vs no pobres',
-       x = 'Pobre (1) vs No Pobre (0)',
-       y = 'Frecuencia')
-
-# Correlation matrix for numeric variables
-
-cor_matrix <- train %>% 
-  select(where(is.numeric)) %>% 
-  cor(use = 'complete.obs')
-
-corrplot(cor_matrix, method = 'shade')
 
 #  Bivariate analysis
 
