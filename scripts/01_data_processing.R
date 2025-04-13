@@ -236,6 +236,43 @@ train_personas_nivel_hogar <- train_personas %>%
              nIngOtros = sum(IngOtros, na.rm = TRUE),
              nOcupado = sum(Ocupado, na.rm = TRUE))
 
+# Create new data frame with head of household data
+
+train_personas_hogar <- train_personas %>%
+  filter(H_Head==1) %>% 
+  select(-c(Orden, H_Head)) %>% 
+  rename(H_Head_Mujer = Mujer, H_Head_Edad = Edad,
+         H_Head_AfiliadoSalud = AfiliadoSalud, H_Head_RegSalud = RegSalud,
+         H_Head_EducLevel = EducLevel, H_Head_Actividad = Actividad,
+         H_Head_TiempoTr = TiempoTr, H_Head_Posicion = Posicion,
+         H_Head_IngHoraE = IngHoraE, H_Head_PrimaMesPasado = PrimaMesPasado,
+         H_Head_BonoMesPasado = BonoMesPasado,
+         H_Head_AuxAlimMesPasado = AuxAlimMesPasado,
+         H_Head_AuxTransMesPasado = AuxTransMesPasado,
+         H_Head_AuxFamMesPasado = AuxFamMesPasado,
+         H_Head_AuxEduMesPasado = AuxEduMesPasado,
+         H_Head_AlimentosMesPasado = AlimentosMesPasado,
+         H_Head_ViviendaMesPasado = ViviendaMesPasado,
+         H_Head_TranspEmpresa = TranspEmpresa,
+         H_Head_IngEspecie = IngEspecie,
+         H_Head_Prima = Prima, H_Head_PrimaNavidad = PrimaNavidad,
+         H_Head_PrimaVacaciones = PrimaVacaciones, H_Head_Viaticos = Viaticos,
+         H_Head_BonoAnual = BonoAnual, H_Head_HorasT = HorasT,
+         H_Head_TamañoEmp = TamañoEmp, H_Head_CotPen = CotPen,
+         H_Head_OtroEmpleo = OtroEmpleo, H_Head_HorasTOtro = HorasTOtro,
+         H_Head_PosicionOtro = PosicionOtro, H_Head_MasHoras = MasHoras,
+         H_Head_MasTrabajo = MasTrabajo, H_Head_Disponibilidad = Disponibilidad,
+         H_Head_DilCambioEmpl = DilCambioEmpl,
+         H_Head_DispCambioEmpl = DispCambioEmpl, H_Head_BusqTrabajo = BusqTrabajo,
+         H_Head_PosUltTrab = PosUltTrab, H_Head_IngTrabDesocu = IngTrabDesocu,
+         H_Head_IngArrPens = IngArrPens, H_Head_IngPension = IngPension,
+         H_Head_IngPAoDI = IngPAoDI, H_Head_IngInstDivCes = IngInstDivCes,
+         H_Head_IngPInterior = IngPInterior, H_Head_IngPExterior = IngPExterior,
+         H_Head_IngInst = IngInst, H_Head_IngAhorros = IngAhorros,
+         H_Head_IngCes = IngCes, H_Head_IngOtros = IngOtros,
+         H_Head_Ocupado = Ocupado) %>%  
+  left_join(train_personas_nivel_hogar)
+
 # Rename columns test personas
 
 test_personas <- test_personas %>%
@@ -382,3 +419,93 @@ test_hogares <- test_hogares %>%
          CuotaAmortizacion=ifelse(is.na(CuotaAmortizacion), 0, CuotaAmortizacion),
          ArriendoEst = ifelse(is.na(ArriendoEst), 0, ArriendoEst),
          ArriendoEfec = ifelse(is.na(ArriendoEfec), 0, ArriendoEfec))
+
+# Create new data frame (test) with vars personas transformed to level hogares
+
+test_personas_nivel_hogar <- test_personas %>% 
+  group_by(id) %>% 
+  summarize (nMujeres = sum(Mujer, na.rm=TRUE),
+             nAfiliados = sum(AfiliadoSalud, na.rm=TRUE),
+             nSubsidiado = sum(RegSalud==3, na.rm=TRUE),
+             maxEducLevel=max(EducLevel,na.rm=TRUE),
+             nTrabajadores = sum(Actividad==1, na.rm=TRUE),
+             maxTiempoTr = max(TiempoTr, na.rm=TRUE),
+             nEmpleado = sum(Posicion==1|Posicion==2, na.rm=TRUE),
+             nJefe = sum(Posicion==5, na.rm=TRUE),
+             nCuentaPropia = sum(Posicion==4, na.rm=TRUE),
+             nMenorRango = sum(Posicion %in% c(3,6,7,8,9), na.rm=TRUE),
+             nIngHoraT = sum(IngHoraE, na.rm=TRUE),
+             nPrimaMesPasado = sum(PrimaMesPasado, na.rm = TRUE),
+             nBonoMesPasado = sum(BonoMesPasado, na.rm = TRUE),
+             nAuxAlimMesPasado = sum(AuxAlimMesPasado, na.rm = TRUE),
+             nAuxTransMesPasado = sum(AuxTransMesPasado, na.rm = TRUE),
+             nAuxFamMesPasado = sum(AuxFamMesPasado, na.rm = TRUE),
+             nAuxEduMesPasado = sum(AuxEduMesPasado, na.rm = TRUE),
+             nAlimentosMesPasado = sum(AlimentosMesPasado, na.rm = TRUE),
+             nViviendaMesPasado = sum(ViviendaMesPasado, na.rm = TRUE),
+             nTranspEmpresa = sum(TranspEmpresa, na.rm = TRUE),
+             nIngEspecie = sum(IngEspecie, na.rm = TRUE),
+             nPrima = sum(Prima, na.rm = TRUE),
+             nPrimaNavidad = sum(PrimaNavidad, na.rm = TRUE),
+             nPrimaVacaciones = sum(PrimaVacaciones, na.rm = TRUE),
+             nViaticos = sum(Viaticos, na.rm = TRUE),
+             nBonoAnual = sum(BonoAnual, na.rm = TRUE),
+             nTiempoCompleto = sum(HorasT>=40, na.rm=TRUE),
+             maxTamañoEmp = max(TamañoEmp, na.rm=TRUE),
+             nCotPen = sum(CotPen, na.rm = TRUE),
+             nOtroEmpleo = sum(OtroEmpleo, na.rm = TRUE),
+             nMasHoras = sum(MasHoras, na.rm = TRUE),
+             nMasTrabajo = sum(MasTrabajo, na.rm = TRUE),
+             nDisponibilidad = sum(Disponibilidad, na.rm = TRUE),
+             nDilCambioEmpl = sum(DilCambioEmpl, na.rm = TRUE),
+             nDispCambioEmpl = sum(DispCambioEmpl, na.rm = TRUE),
+             nBusqTrabajo = sum(BusqTrabajo, na.rm = TRUE),
+             nIngTrabDesocu = sum(IngTrabDesocu, na.rm = TRUE),
+             nIngArrPens = sum(IngArrPens, na.rm = TRUE),
+             nIngPension = sum(IngPension, na.rm = TRUE),
+             nIngPAoDI = sum(IngPAoDI, na.rm = TRUE),
+             nIngInstDivCes = sum(IngInstDivCes, na.rm = TRUE),
+             nIngPInterior = sum(IngPInterior, na.rm = TRUE),
+             nIngPExterior = sum(IngPExterior, na.rm = TRUE),
+             nIngInst = sum(IngInst, na.rm = TRUE),
+             nIngAhorros = sum(IngAhorros, na.rm = TRUE),
+             nIngCes = sum(IngCes, na.rm = TRUE),
+             nIngOtros = sum(IngOtros, na.rm = TRUE),
+             nOcupado = sum(Ocupado, na.rm = TRUE))
+
+# Create new data frame with head of household data
+
+test_personas_hogar <- test_personas %>%
+  filter(H_Head==1) %>% 
+  select(-c(Orden, H_Head)) %>% 
+  rename(H_Head_Mujer = Mujer, H_Head_Edad = Edad,
+         H_Head_AfiliadoSalud = AfiliadoSalud, H_Head_RegSalud = RegSalud,
+         H_Head_EducLevel = EducLevel, H_Head_Actividad = Actividad,
+         H_Head_TiempoTr = TiempoTr, H_Head_Posicion = Posicion,
+         H_Head_IngHoraE = IngHoraE, H_Head_PrimaMesPasado = PrimaMesPasado,
+         H_Head_BonoMesPasado = BonoMesPasado,
+         H_Head_AuxAlimMesPasado = AuxAlimMesPasado,
+         H_Head_AuxTransMesPasado = AuxTransMesPasado,
+         H_Head_AuxFamMesPasado = AuxFamMesPasado,
+         H_Head_AuxEduMesPasado = AuxEduMesPasado,
+         H_Head_AlimentosMesPasado = AlimentosMesPasado,
+         H_Head_ViviendaMesPasado = ViviendaMesPasado,
+         H_Head_TranspEmpresa = TranspEmpresa,
+         H_Head_IngEspecie = IngEspecie,
+         H_Head_Prima = Prima, H_Head_PrimaNavidad = PrimaNavidad,
+         H_Head_PrimaVacaciones = PrimaVacaciones, H_Head_Viaticos = Viaticos,
+         H_Head_BonoAnual = BonoAnual, H_Head_HorasT = HorasT,
+         H_Head_TamañoEmp = TamañoEmp, H_Head_CotPen = CotPen,
+         H_Head_OtroEmpleo = OtroEmpleo, H_Head_HorasTOtro = HorasTOtro,
+         H_Head_PosicionOtro = PosicionOtro, H_Head_MasHoras = MasHoras,
+         H_Head_MasTrabajo = MasTrabajo, H_Head_Disponibilidad = Disponibilidad,
+         H_Head_DilCambioEmpl = DilCambioEmpl,
+         H_Head_DispCambioEmpl = DispCambioEmpl, H_Head_BusqTrabajo = BusqTrabajo,
+         H_Head_PosUltTrab = PosUltTrab, H_Head_IngTrabDesocu = IngTrabDesocu,
+         H_Head_IngArrPens = IngArrPens, H_Head_IngPension = IngPension,
+         H_Head_IngPAoDI = IngPAoDI, H_Head_IngInstDivCes = IngInstDivCes,
+         H_Head_IngPInterior = IngPInterior, H_Head_IngPExterior = IngPExterior,
+         H_Head_IngInst = IngInst, H_Head_IngAhorros = IngAhorros,
+         H_Head_IngCes = IngCes, H_Head_IngOtros = IngOtros,
+         H_Head_Ocupado = Ocupado) %>%  
+  left_join(test_personas_nivel_hogar)
