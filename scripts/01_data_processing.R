@@ -17,7 +17,7 @@ rm(list = ls())
 # Set up paths
 
 dir <- list ()
-dir$root <- setwd(r'(C:\Users\Juanita.Rojas\BDML-PS2-G11)')
+dir$root <- getwd()
 dir$processed <- file.path(dir$root, "store", "processed")
 dir$raw <- file.path(dir$root, "store", "raw")
 dir$views <- file.path(dir$root, "views")
@@ -31,64 +31,64 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 # Load inputs
 
 train_hogares <- read.csv(file.path(dir$raw, "train_hogares.csv"))
-train_personas<-read.csv(file.path(dir$raw, "train_personas.csv"))
+train_personas <- read.csv(file.path(dir$raw, "train_personas.csv"))
 
 # Rename columns personas
 
 train_personas <- train_personas %>%
   rename(
-    sexo = P6020,
-    edad = P6040,
-    parentesco_jefe = P6050,
-    afiliado_salud = P6090,
-    seg_social_salud = P6100,
-    educacion = P6210,
-    grado_escolar = P6210s1,
-    actividad1 = P6240,
-    meses_trabajando = P6426,
-    posicion_act1 = P6430,
-    horas_extras = P6510,
-    primas = P6545,
-    bonificaciones = P6580,
-    auxilio_alimentacion = P6585s1,
-    auxilio_transporte = P6585s2,
-    subsidio_familiar = P6585s3,
-    subsidio_educativo = P6585s4,
-    pago_alimentos = P6590,
-    pago_vivienda = P6600,
-    transporte_empresa = P6610,
-    ingresos_especie = P6620,
-    prima_servicios12 = P6630s1,
-    prima_navidad12 = P6630s2,
-    prima_vacaciones12 = P6630s3,
-    viaticos12 = P6630s4,
-    bonificaciones_anuales12 = P6630s6,
-    horas_sem = P6800,
-    personas_trabajo = P6870,
-    cotiza_pension = P6920,
-    otro_trabajo = P7040,
-    horas_actividad2 = P7045,
-    posicion_act2 = P7050,
-    trabajar_mas = P7090,
-    trabajar_mas4 = P7110,
-    disp_trabajar_mas = P7120,
-    cambiar_trabajo4 = P7150,
-    trabajo_1vez = P7310,
-    desocup_posicion = P7350,
-    desocup_ing = P7422,
-    ing_adicional = P7495,
-    pension_vejez = P7500s2,
-    pension_alimenticia = P7500s3,
-    ing_otros = P7505,
-    dinero_hogares_residentes = P7510s1,
-    dinero_hogares_fuera = P7510s2,
-    dinero_instituciones = P7510s3,
-    dinero_intereses = P7510s5,
-    dinero_cesantias = P7510s6,
-    dinero_otros = P7510s7,
-    ocupado = Oc,
-    desocupado = Des,
-    inactivo = Ina)
+    Sexo = P6020,
+    Edad = P6040,
+    H_Head = P6050,
+    AfiliadoSalud = P6090,
+    RegSalud = P6100,
+    EducLevel = P6210,
+    Actividad = P6240,
+    TiempoTr = P6426,
+    Posicion = P6430,
+    IngHoraE = P6510,
+    PrimaMesPasado = P6545,
+    BonoMesPasado = P6580,
+    AuxAlimMesPasado = P6585s1,
+    AuxTransMesPasado = P6585s2,
+    AuxFamMesPasado = P6585s3,
+    AuxEduMesPasado = P6585s4,
+    AlimentosMesPasado = P6590,
+    ViviendaMesPasado = P6600,
+    TranspEmpresa = P6610,
+    IngEspecie = P6620,
+    Prima = P6630s1,
+    PrimaNavidad = P6630s2,
+    PrimaVacaciones = P6630s3,
+    Viaticos = P6630s4,
+    BonoAnual = P6630s6,
+    HorasT = P6800,
+    TamañoEmp = P6870,
+    CotPen = P6920,
+    OtroEmpleo = P7040,
+    HorasTOtro = P7045,
+    PosicionOtro = P7050,
+    MasHoras = P7090,
+    MasTrabajo = P7110,
+    Disponibilidad = P7120,
+    DilCambioEmpl = P7150,
+    DispCambioEmpl = P7160,
+    BusqTrabajo = P7310,
+    PosUltTrab = P7350,
+    IngTrabDesocu = P7422,
+    IngArrPens = P7495,
+    IngPension = P7500s2,
+    IngPAoDI = P7500s3,
+    IngInstDivCes = P7505,
+    IngPInterior = P7510s1,
+    IngPExterior = P7510s2,
+    IngInst = P7510s3,
+    IngAhorros = P7510s5,
+    IngCes = P7510s6,
+    IngOtros = P7510s7,
+    Ocupado = Oc,
+    Desocupado = Des,
+    Inactivo = Ina)
 
 # Rename columns hogares
 
