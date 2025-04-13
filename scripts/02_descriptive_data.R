@@ -18,11 +18,11 @@ rm(list = ls())
 # Set up paths
 
 dir <- list()
-dir$root <- getwd()
-dir$store <- file.path(dir$root, "store")
+dir$root <- setwd(r'(C:\Users\Juanita.Rojas\BDML-PS2-G11)')
+dir$processed <- file.path(dir$root, "store", "processed")
+dir$raw <- file.path(dir$root, "store", "raw")
 dir$views <- file.path(dir$root, "views")
 dir$scripts <- file.path(dir$root, "scripts")
-dir$results <- file.path(dir$root, "results")
 setwd(dir$root)
 
 # Load required libraries
@@ -35,8 +35,8 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 
 # Load data
 
-train_hogares <- read.csv(file.path(dir$store, "train_hogares.csv"))
-train_personas <- read.csv(file.path(dir$store, "train_personas.csv"))
+train <- read.csv(file.path(dir$processed, "train.csv"))
+test <- read.csv(file.path(dir$processed, "test.csv"))
 
 # Initial exploration
 
