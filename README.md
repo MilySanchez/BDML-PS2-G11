@@ -1,6 +1,9 @@
-# Repositorio de Conjunto de Problemas - Grupo 11: Big Data y Machine Learning para la Economía Aplicada
+# Repositorio de Conjunto de Problemas 2: Prediciendo la pobreza - Grupo 11: Big Data y Machine Learning para la Economía Aplicada
 
-Este repositorio tiene como objetivo analizar la relación del ingreso salarial por hora de la población colombiana, utilizando técnicas de **Big Data** y **Machine Learning** aplicadas a los datos obtenidos previamente por el profesor [Manuel Fernández Sierra](https://sites.google.com/view/manuelfernandezsierra) y alojados en la pagina del profesor [Ignacio Sarmiento](https://ignaciomsarmiento.github.io/GEIH2018_sample/) con base a la Gran Encuesta Integrada de Hogares (GEIH) del  **[DANE](https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral/empleo-y-desempleo/geih-historicos)**.
+
+Este repositorio tiene como objetivo predecir la pobreza en hogares colombianos utilizando técnicas de **Machine Learning** como regresión logística, Elastic Net, árboles de decisión (CARTs), bosques aleatorios y métodos de boosting. Los datos provienen del **DANE** y de la misión **MESE** (Empalme de las Series de Empleo, Pobreza y Desigualdad), e incluyen información tanto a nivel de hogar como de individuo, lo que permite construir variables adicionales que mejoran la capacidad predictiva de los modelos.Este proyecto hace parte de una competencia en [**Kaggle**](https://www.kaggle.com/competitions/uniandes-bdml-202510-ps-2/team), organizada en el marco del curso de *Big Data y Machine Learning* de la **Universidad de los Andes** durante el semestre 2025-1. El objetivo es construir modelos precisos que utilicen la menor cantidad de variables posible, lo que permitiría diseñar encuestas más focalizadas, rápidas y económicas para una mejor implementación y evaluación de políticas públicas en Colombia.
+
+
 ## Estructura del Repositorio
 
 Este repositorio está dividido en varias carpetas que organizan el contenido de manera eficiente:
