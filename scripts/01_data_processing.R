@@ -168,4 +168,15 @@ train_personas <- train_personas %>%
 
 # Select relevant variables hogares and create new ones
 
-
+train_hogares <- train_hogares %>%
+  select(id, Clase, Dominio, Cuartos, CuartosDormir, TenenciaVivienda,
+         CuotaAmortizacion, ArriendoEst, ArriendoEfec, Npersonas, NpersonasUG,
+         Lindigencia, Lpobreza, Fex_c, Depto, Fex_dpto, Pobre) %>%  
+  mutate(Pobre = factor(Pobre,levels=c(0,1),labels=c("No","Yes")),
+         Dominio=factor(Dominio),
+         arriendo=ifelse(!is.na(ArriendoEfec),ArriendoEfec,
+                         ifelse(!is.na(CuotaAmortizacion),CuotaAmortizacion,
+                                ArriendoEst)),
+         CuotaAmortizacion=ifelse(is.na(CuotaAmortizacion), 0, CuotaAmortizacion),
+         ArriendoEst = ifelse(is.na(ArriendoEst), 0, ArriendoEst),
+         ArriendoEfec = ifelse(is.na(ArriendoEfec), 0, ArriendoEfec))
