@@ -67,6 +67,52 @@ train <- train %>%
 
 skimtrain <- skim(train)
 
+skimtrain <- skimtrain %>%
+  rename_with(~ gsub("numeric\\.", "", .x)) %>% 
+  rename(variable = skim_variable, c_rate = complete_rate, type = skim_type) %>% 
+  mutate(across(where(is.numeric), ~ format(.x, scientific = TRUE))) %>% 
+  arrange(variable)
+
+stargazer(as.data.frame(skimtrain), summary = F, type = 'text',
+          out = file.path(dir$views, 'data_description_total.txt'))
+
+skim_summary_factor <- skim(train %>%
+                       select(c(Pobre, TenenciaVivienda, H_Head_EducLevel,
+                                maxEducLevel, H_Head_Posicion,
+                                H_Head_ViviendaMesPasado, Depto)))
+
+skim_summary_num <- skim(train %>%
+                              select(c(nCotPen, NpersonasUG, nIngArrPens,
+                                       arriendo, nSubsidiado, nTiempoCompleto,
+                                       nIngPension, nOcupado, nTrabajadores,
+                                       nEmpleado, maxTiempoTr, nPrima,
+                                       nIngTrabDesocu, nAfiliados, ArriendoEst,
+                                       ArriendoEfec, nIngPExterior,
+                                       nIngPInterior, nAlimentosMesPasado,
+                                       H_Head_HorasT)))
+
+skim_summary_factor <- skim_summary_factor %>% 
+  select(-factor.ordered) %>% 
+  rename_with(~ gsub("factor\\.", "", .x)) %>% 
+  rename(variable = skim_variable) %>% 
+  arrange(variable)
+
+stargazer(as.data.frame(skim_summary_factor),
+          summary=F,
+          type="text",
+          out = file.path(dir$views,'description_summary_factor.txt'))
+
+skim_summary_num <- skim_summary_num %>% 
+  select(-numeric.hist) %>% 
+  rename_with(~ gsub("numeric\\.", "", .x)) %>% 
+  rename(variable = skim_variable, type = skim_type) %>% 
+  arrange(variable)
+
+stargazer(as.data.frame(skim_summary_num),
+          summary=F,
+          type="text",
+          out = file.path(dir$views,'description_summary_num.txt'))
+
 # Descriptive statistics for categorical variables
 
 table(train$Pobre)
@@ -98,13 +144,4 @@ ggsave(filename = file.path(dir$views, 'distribucion_pobreza.png'),
 train %>% 
   select(where(is.factor)) %>% 
   summary()
-
-#  Bivariate analysis
-
-# train %>% 
-#   group_by(Pobre) %>% 
-#   summarise()
-
-table(train$Dominio, train$Pobre) %>% 
-  chisq.test()
 
