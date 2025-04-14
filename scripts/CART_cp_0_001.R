@@ -1,3 +1,14 @@
+##########################################################
+# Title: CART_cp_0_001
+##########################################################
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+
+# Clear workspace
+
+
 rm(list = ls())
 
 # Set up paths
@@ -15,14 +26,23 @@ setwd(dir$root)
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
+# Load train and test files
+
 train <- read.csv(file.path(dir$processed, "train.csv")) 
 
 test <- read.csv(file.path(dir$processed, "test.csv")) 
 
+# Downsapling
+train$Pobre <- as.factor(train$Pobre)
+
+train <- downSample(x = train |> select(-Pobre),y = train$Pobre,yname = "Pobre")
+
+# CART
+
 ctrl<- trainControl(
   method = "cv", 
-  summaryFunction = defaultSummary, #medida de rendimiento 
-  number = 5) # número de folds
+  summaryFunction = defaultSummary,
+  number = 5)
 
 grid <- expand.grid(cp = seq(0, 0.03, 0.001))
 
@@ -50,11 +70,13 @@ acc_costcomp <- train(Pobre ~ Cuartos + CuartosDormir + TenenciaVivienda + Cuota
                         nDispCambioEmpl + nBusqTrabajo + nIngTrabDesocu + nIngArrPens + nIngPension + nIngPAoDI + 
                         nIngInstDivCes + nIngPInterior + nIngPExterior + nIngInst + nIngAhorros + nIngCes + nIngOtros + nOcupado,
                       data = train,
-                      method = "rpart", #Algorítmo de árbol de decisión
+                      method = "rpart",
                       trControl = ctrl, 
-                      tuneGrid = grid, #grilla de los alphas
+                      tuneGrid = grid, 
                       metric="F1"
 )
+
+# Prediction
 
 predictSample <- test |> 
   mutate(pobre_lab=predict(acc_costcomp, newdata=test, type="raw")) |>
@@ -65,6 +87,7 @@ predictSample <- predictSample |> mutate(pobre=ifelse(pobre_lab=="Yes",1,0)) |>
 
 cp_str <- gsub("\\.","_", as.character(acc_costcomp$bestTune$cp))
 
+# Final file
 
 name <- paste0(
   "CART_cp_", cp_str,

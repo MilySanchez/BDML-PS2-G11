@@ -1,12 +1,12 @@
-# Este modelo integra las anteriores variables de Pensión y Prima, junto con
-# una nueva variable de arriendo, que toma valor dependiendo de si la persona
-# paga arriendo, amortización o el valor hipotético. El caso en el que no pagan
-# arriendo por tener casa propia igual se toma como si el caso hipotético fuese
-# lo que pagasen. Puntuación 0.4665
-# Clear workspace
+##########################################################
+# Title: EN_lambda_0_01_alpha_0_2 - V2
+##########################################################
 
-# variables a tener en cuenta P6040 edad, P6090 salud, P6100 régimen de salud, P6426 tiempo en la empresa, 
-# P6430 posición en el trabajo, P6585s2 recibió auxilio de transorte, P6800 horas que trabaja 
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+
+# Clear workspace
 
 
 rm(list = ls())
@@ -26,6 +26,8 @@ setwd(dir$root)
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
+# Load train and test files
+
 train <- read.csv(file.path(dir$processed, "train.csv")) |> select(c(Clase, Dominio, Cuartos, CuartosDormir, TenenciaVivienda, 
                                                                      Npersonas, NpersonasUG, Lindigencia, Lpobreza, Fex_c, Depto, Fex_dpto, 
                                                                      Pobre, arriendo, H_Head_Mujer, H_Head_EducLevel, 
@@ -39,7 +41,7 @@ test <- read.csv(file.path(dir$processed, "test.csv")) |> select(c(Clase, Domini
                                                                    nOcupado, maxEducLevel, nCotPen, nPrima, nSubsidiado))
 
 
-#MODELO
+# Model
 
 ctrl<- trainControl(
   method="cv",
@@ -60,7 +62,7 @@ model1 <- train(
     lambda=10^seq(10,-2,length=10)
   )
 )
-#Predicción
+# Prediction
 
 predictSample <- test |> 
   mutate(pobre_lab=predict(model1, newdata=test, type="raw")) |>
@@ -69,7 +71,7 @@ predictSample <- test |>
 predictSample <- predictSample |> mutate(pobre=ifelse(pobre_lab=="Yes",1,0)) |>
   select(id, pobre)
 
-#Archivo final
+# Final file
 
 lambda_str <- gsub(
   "\\.","_",

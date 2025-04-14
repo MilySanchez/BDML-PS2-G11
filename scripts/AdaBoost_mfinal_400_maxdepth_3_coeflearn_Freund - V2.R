@@ -1,3 +1,13 @@
+##########################################################
+# Title: AdaBoost_mfinal_400_maxdepth_3_coeflearn_Freund - V2
+##########################################################
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+
+# Clear workspace
+
 rm(list = ls())
 
 # Set up paths
@@ -15,18 +25,26 @@ setwd(dir$root)
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
+# Load train and test files
+
 train <- read.csv(file.path(dir$processed, "train.csv")) 
 
 test <- read.csv(file.path(dir$processed, "test.csv")) 
 
-#BOOSTING
+# Downsapling
+
+train$Pobre <- as.factor(train$Pobre)
+
+train <- downSample(x = train |> select(-Pobre),y = train$Pobre,yname = "Pobre")
+
+# BOOSTING
 
 set.seed(123)
 
 fiveStats <- function(...) {
   c(
-    caret::twoClassSummary(...), # Returns ROC, Sensitivity, and Specificity
-    caret::defaultSummary(...)  # Returns RMSE and R-squared (for regression) or Accuracy and Kappa (for classification)
+    caret::twoClassSummary(...),
+    caret::defaultSummary(...)
   )
 }
 
@@ -47,13 +65,13 @@ adagrid <- expand.grid(
 
 adaboost_tree <- train(Pobre ~ nCotPen + NpersonasUG + nIngArrPens + ArriendoEst + nSubsidiado + Npersonas +nTiempoCompleto,
                        data = train, 
-                       method = "AdaBoost.M1",  # para implementar el algoritmo antes descrito
+                       method = "AdaBoost.M1", 
                        trControl = ctrl,
                        metric = "F1",
                        tuneGrid=adagrid
 )
 
-#Predicción
+# Prediction
 
 predictSample <- test |> 
   mutate(pobre_lab=predict(adaboost_tree, newdata=test, type="raw")) |>
@@ -62,7 +80,7 @@ predictSample <- test |>
 predictSample <- predictSample |> mutate(pobre=ifelse(pobre_lab=="Yes",1,0)) |>
   select(id, pobre)
 
-#Archivo final
+# Final file
 
 mfinal <- gsub("\\.","_", as.character(adaboost_tree$bestTune$mfinal))
 

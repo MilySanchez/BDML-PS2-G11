@@ -1,3 +1,14 @@
+##########################################################
+# Title: CART_cp_0
+##########################################################
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+
+# Clear workspace
+
+
 rm(list = ls())
 
 # Set up paths
@@ -15,9 +26,18 @@ setwd(dir$root)
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
+# Load train and test files
+
 train <- read.csv(file.path(dir$processed, "train.csv")) 
 
 test <- read.csv(file.path(dir$processed, "test.csv")) 
+
+# Downsapling
+train$Pobre <- as.factor(train$Pobre)
+
+train <- downSample(x = train |> select(-Pobre),y = train$Pobre,yname = "Pobre")
+
+# CART
 
 fiveStats <- function(...) {
   c(
@@ -66,6 +86,8 @@ acc_costcomp <- train(Pobre ~ Cuartos + CuartosDormir + TenenciaVivienda + Cuota
                       metric="F1"
 )
 
+# Prediction
+
 predictSample <- test |> 
   mutate(pobre_lab=predict(acc_costcomp, newdata=test, type="raw")) |>
   select(id, pobre_lab)
@@ -75,6 +97,7 @@ predictSample <- predictSample |> mutate(pobre=ifelse(pobre_lab=="Yes",1,0)) |>
 
 cp_str <- gsub("\\.","_", as.character(acc_costcomp$bestTune$cp))
 
+# Final file
 
 name <- paste0(
   "CART_cp_", cp_str,

@@ -1,3 +1,14 @@
+##########################################################
+# Title: XGBoost_nrounds_500_max_depth _3_eta_0_1_gamma_1_colsample_bytree_0_8_min_child_weight_10_subsample_0_7
+##########################################################
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+
+# Clear workspace
+
+
 rm(list = ls())
 
 # Set up paths
@@ -15,22 +26,28 @@ setwd(dir$root)
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
+# Load train and test files
+
 train <- read.csv(file.path(dir$processed, "train.csv")) 
 
 test <- read.csv(file.path(dir$processed, "test.csv")) 
 
-#BOOSTING
+# Downsapling
+train$Pobre <- as.factor(train$Pobre)
+
+train <- downSample(x = train |> select(-Pobre),y = train$Pobre,yname = "Pobre")
+
+# BOOSTING
 
 set.seed(123)
 
 fiveStats <- function(...) {
   c(
-    caret::twoClassSummary(...), # Returns ROC, Sensitivity, and Specificity
-    caret::defaultSummary(...)  # Returns RMSE and R-squared (for regression) or Accuracy and Kappa (for classification)
+    caret::twoClassSummary(...),
+    caret::defaultSummary(...)
   )
 }
 
-#train <- train[sample(nrow(train), 1000), ]
 
 ctrl<- trainControl(method = "cv",
                     number = 5,
@@ -41,11 +58,11 @@ ctrl<- trainControl(method = "cv",
 
 grid_xgboost <- expand.grid(
   nrounds = c(250, 500),
-  max_depth = c(2, 3),  # aumentamos un poco para permitir más complejidad
-  eta = c(0.1, 0.05),   # eliminamos 0.01 que puede ser muy lento
+  max_depth = c(2, 3),
+  eta = c(0.1, 0.05), 
   gamma = c(0, 1),
-  min_child_weight = c(10),  # mantenemos uno representativo
-  colsample_bytree = c(0.6, 0.8),  # valores más comunes en la práctica
+  min_child_weight = c(10), 
+  colsample_bytree = c(0.6, 0.8),
   subsample = c(0.7)
 )
 
@@ -80,7 +97,7 @@ Xgboost_tree <- train(Pobre ~ Cuartos + CuartosDormir + TenenciaVivienda + Cuota
                       verbosity = 0
 )   
 
-#Predicción
+# Prediction
 
 predictSample <- test |> 
   mutate(pobre_lab=predict(Xgboost_tree, newdata=test, type="raw")) |>
@@ -89,7 +106,7 @@ predictSample <- test |>
 predictSample <- predictSample |> mutate(pobre=ifelse(pobre_lab=="Yes",1,0)) |>
   select(id, pobre)
 
-#Archivo final
+# Final file
 
 nrounds <- gsub("\\.","_", as.character(Xgboost_tree$bestTune$nrounds))
 

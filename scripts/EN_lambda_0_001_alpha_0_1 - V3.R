@@ -1,8 +1,11 @@
-# Este modelo integra las anteriores variables de Pensión y Prima, junto con
-# una nueva variable de arriendo, que toma valor dependiendo de si la persona
-# paga arriendo, amortización o el valor hipotético. El caso en el que no pagan
-# arriendo por tener casa propia igual se toma como si el caso hipotético fuese
-# lo que pagasen. Puntuación 0.6088
+##########################################################
+# Title: EN_lambda_0_001_alpha_0_1 - V3
+##########################################################
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+
 # Clear workspace
 
 rm(list = ls())
@@ -22,6 +25,8 @@ setwd(dir$root)
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
+# Load train and test files
+
 train <- read.csv(file.path(dir$processed, "train.csv")) |> select(c(Clase, Dominio, Cuartos, CuartosDormir, TenenciaVivienda, 
                                                                      Npersonas, NpersonasUG, Lindigencia, Lpobreza, Fex_c, Depto, Fex_dpto, 
                                                                      Pobre, arriendo, H_Head_Mujer, H_Head_EducLevel, 
@@ -35,7 +40,7 @@ test <- read.csv(file.path(dir$processed, "test.csv")) |> select(c(Clase, Domini
                                                                    nOcupado, maxEducLevel, nCotPen, nPrima, nIngInstDivCes))
 
 
-#MODELO
+# Model
 
 ctrl<- trainControl(
   method="cv",
@@ -57,7 +62,7 @@ model1 <- train(
   )
 )
 
-#Predicción
+# Prediction
 
 predictSample <- test |> 
   mutate(pobre_lab=predict(model1, newdata=test, type="raw")) |>
@@ -66,7 +71,7 @@ predictSample <- test |>
 predictSample <- predictSample |> mutate(pobre=ifelse(pobre_lab=="Yes",1,0)) |>
   select(id, pobre)
 
-#Archivo final
+# Final file
 
 lambda_str <- gsub(
   "\\.","_",

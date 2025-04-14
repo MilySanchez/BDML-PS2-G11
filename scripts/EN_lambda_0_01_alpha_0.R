@@ -1,4 +1,13 @@
+##########################################################
+# Title: EN_lambda_0_01_alpha_0
+##########################################################
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+# 0. Workspace configuration ====================================================================
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  = = = = = = = = 
+
 # Clear workspace
+
 
 
 rm(list = ls())
@@ -18,6 +27,8 @@ setwd(dir$root)
 
 source(file.path(dir$scripts, "00_load_requierments.R"))
 
+# Load train and test files
+
 train <- read.csv(file.path(dir$processed, "train.csv")) |> select(c(Clase, Dominio, Cuartos, CuartosDormir, TenenciaVivienda, CuotaAmortizacion, ArriendoEst, ArriendoEfec,
                                                                      Npersonas, NpersonasUG, Lindigencia, Lpobreza, Fex_c, Depto, Fex_dpto, 
                                                                      Pobre, H_Head_Mujer, H_Head_EducLevel, 
@@ -30,7 +41,7 @@ test <- read.csv(file.path(dir$processed, "test.csv")) |> select(c(Clase, Domini
                                                                    H_Head_Ocupado, H_Head_CotPen, H_Head_Prima, 
                                                                    nOcupado, maxEducLevel, nCotPen, nPrima))
 
-#MODELO
+# Model
 
 ctrl<- trainControl(
   method="cv",
@@ -52,7 +63,7 @@ model1 <- train(
   )
 )
 
-#Predicción
+# Prediction
 
 predictSample <- test |> 
   mutate(pobre_lab=predict(model1, newdata=test, type="raw")) |>
@@ -61,7 +72,7 @@ predictSample <- test |>
 predictSample <- predictSample |> mutate(pobre=ifelse(pobre_lab=="Yes",1,0)) |>
   select(id, pobre)
 
-#Archivo final
+# Final file
 
 lambda_str <- gsub(
   "\\.","_",
