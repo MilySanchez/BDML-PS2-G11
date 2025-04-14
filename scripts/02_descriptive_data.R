@@ -37,7 +37,7 @@ source(file.path(dir$scripts, "00_load_requierments.R"))
 
 train <- read.csv(file.path(dir$processed, "train.csv"))
 
-# Transform variable types
+# Transform variables to factor
 
 train <- train %>% 
   mutate(across(c(Pobre, Dominio, Clase, TenenciaVivienda, Depto,
@@ -73,23 +73,17 @@ skimtrain <- skimtrain %>%
   mutate(across(where(is.numeric), ~ format(.x, scientific = TRUE))) %>% 
   arrange(variable)
 
+# Export results to text files
+
 stargazer(as.data.frame(skimtrain), summary = F, type = 'text',
           out = file.path(dir$views, 'data_description_total.txt'))
+
+# Generate statistics for categorical variables
 
 skim_summary_factor <- skim(train %>%
                        select(c(Pobre, TenenciaVivienda, H_Head_EducLevel,
                                 maxEducLevel, H_Head_Posicion,
                                 H_Head_ViviendaMesPasado, Depto)))
-
-skim_summary_num <- skim(train %>%
-                              select(c(nCotPen, NpersonasUG, nIngArrPens,
-                                       arriendo, nSubsidiado, nTiempoCompleto,
-                                       nIngPension, nOcupado, nTrabajadores,
-                                       nEmpleado, maxTiempoTr, nPrima,
-                                       nIngTrabDesocu, nAfiliados, ArriendoEst,
-                                       ArriendoEfec, nIngPExterior,
-                                       nIngPInterior, nAlimentosMesPasado,
-                                       H_Head_HorasT)))
 
 skim_summary_factor <- skim_summary_factor %>% 
   select(-factor.ordered, -skim_type, -n_missing) %>% 
@@ -102,6 +96,17 @@ stargazer(as.data.frame(skim_summary_factor),
           type="text",
           out = file.path(dir$views,'description_summary_factor.txt'))
 
+# Generate statistics for numeric vars
+skim_summary_num <- skim(train %>%
+                              select(c(nCotPen, NpersonasUG, nIngArrPens,
+                                       arriendo, nSubsidiado, nTiempoCompleto,
+                                       nIngPension, nOcupado, nTrabajadores,
+                                       nEmpleado, maxTiempoTr, nPrima,
+                                       nIngTrabDesocu, nAfiliados, ArriendoEst,
+                                       ArriendoEfec, nIngPExterior,
+                                       nIngPInterior, nAlimentosMesPasado,
+                                       H_Head_HorasT)))
+
 skim_summary_num <- skim_summary_num %>% 
   select(-numeric.hist, -skim_type, -n_missing) %>% 
   rename_with(~ gsub("numeric\\.", "", .x)) %>% 
@@ -113,25 +118,26 @@ stargazer(as.data.frame(skim_summary_num),
           type="text",
           out = file.path(dir$views,'description_summary_num.txt'))
 
-# Descriptive statistics for categorical variables
+# Create frequency table of Pobre
 
 table(train$Pobre)
 prop_pobre <- prop.table(table(train$Pobre))*100
+
+# Convert to df to plot
+
 df_pobre <- data.frame(Pobre = names(prop_pobre),
                        Porcentaje = as.numeric(prop_pobre))
 
 pobre_plot <- ggplot(df_pobre, aes(x = Pobre, y = Porcentaje, fill = Pobre)) +
   geom_col(width = 0.6, alpha = 0.8) +
-  scale_fill_manual(values = c('No' = '#3498db', 'Yes' = '#e74c3c')) +
   labs(title = 'Distribución de hogares por condición de pobreza',
-       x = 'Condición de pobreza',
+         x = 'Pobre',
        y = 'Porcentaje (%)',
        caption = paste('Total de hogares:', nrow(train))) +
-  geom_text(aes(label = sprintf('%.1f%%', Porcentaje)),
-            vjust = -0.5, size = 4, fontface = 'bold') +
   theme_minimal() + 
   theme(legend.position = 'none',
-        plot.title = element_text(face = 'bold', hjust = 0.5),
+        plot.title = element_text(face = 'italic', hjust = 0.5),
+        plot.caption = element_text(face = 'italic'),
         axis.text = element_text(size = 10),
         panel.grid.major.x = element_blank())
 
@@ -140,6 +146,8 @@ ggsave(filename = file.path(dir$views, 'distribucion_pobreza.png'),
        width = 7,
        height = 5,
        dpi = 300)
+
+# Summarize factor vars
 
 train %>% 
   select(where(is.factor)) %>% 
