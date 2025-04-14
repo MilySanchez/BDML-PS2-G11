@@ -92,7 +92,7 @@ skim_summary_num <- skim(train %>%
                                        H_Head_HorasT)))
 
 skim_summary_factor <- skim_summary_factor %>% 
-  select(-factor.ordered) %>% 
+  select(-factor.ordered, -skim_type, -n_missing) %>% 
   rename_with(~ gsub("factor\\.", "", .x)) %>% 
   rename(variable = skim_variable) %>% 
   arrange(variable)
@@ -103,9 +103,9 @@ stargazer(as.data.frame(skim_summary_factor),
           out = file.path(dir$views,'description_summary_factor.txt'))
 
 skim_summary_num <- skim_summary_num %>% 
-  select(-numeric.hist) %>% 
+  select(-numeric.hist, -skim_type, -n_missing) %>% 
   rename_with(~ gsub("numeric\\.", "", .x)) %>% 
-  rename(variable = skim_variable, type = skim_type) %>% 
+  rename(variable = skim_variable) %>% 
   arrange(variable)
 
 stargazer(as.data.frame(skim_summary_num),
