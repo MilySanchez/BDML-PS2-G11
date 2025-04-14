@@ -130,13 +130,11 @@ df_pobre <- data.frame(Pobre = names(prop_pobre),
 
 pobre_plot <- ggplot(df_pobre, aes(x = Pobre, y = Porcentaje, fill = Pobre)) +
   geom_col(width = 0.6, alpha = 0.8) +
-  labs(title = 'Distribución de hogares por condición de pobreza',
-         x = 'Pobre',
+  labs(x = 'Pobre',
        y = 'Porcentaje (%)',
        caption = paste('Total de hogares:', nrow(train))) +
   theme_minimal() + 
   theme(legend.position = 'none',
-        plot.title = element_text(face = 'italic', hjust = 0.5),
         plot.caption = element_text(face = 'italic'),
         axis.text = element_text(size = 10),
         panel.grid.major.x = element_blank())
