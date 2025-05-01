@@ -378,34 +378,15 @@ train <- upSample(x = train %>%
 
 ###############
 
-fiveStats <- function(...) c(prSummary(...))
-
-ctrl <- trainControl(method = "cv",
-                     number = 5,
-                     classProbs = T,
-                     summaryFunction = fiveStats,
-                     savePredictions = T)
-
-set.seed(111)
-
-model2 <- train(Pobre~.,
-                data = train,
-                method = "glm",
-                family = binomial,
-                metric = "F",
-                trControl = ctrl)
-
-model2
+model_logit <- glm(Pobre ~ ., data = train, family = binomial)
+summary(model_logit)
 
 ##################
 
 predictSample <- test %>% 
-  mutate(pobre_lab = predict(model2, newdata = test,
-                             type = "raw")) %>% 
-  select(id, pobre_lab)
-
-predictSample <- predictSample %>% 
-  mutate(pobre = ifelse(pobre_lab == "Yes",1,0)) %>% 
+  mutate(pobre_lab = predict(model_logit, newdata = test,
+                             type = "response")) %>%
+  mutate(pobre = ifelse(pobre_lab > 0.5, 1, 0)) %>% 
   select(id, pobre)
 
 template <- read.csv('sample_submission.csv')
